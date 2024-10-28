@@ -12,6 +12,7 @@ import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.data.batis.DataBatisScan;
 import wxdgaming.spring.boot.web.WebScan;
+import wxdgaming.spring.boot.webclient.WebClientScan;
 
 @Slf4j
 @EnableScheduling
@@ -20,6 +21,7 @@ import wxdgaming.spring.boot.web.WebScan;
                 CoreScan.class,
                 DataBatisScan.class,
                 WebScan.class,
+                WebClientScan.class,
                 RantMain.class,
         },
         exclude = {

@@ -1,8 +1,11 @@
 package wxdgaming.spring.boot.rant.entity.store;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import wxdgaming.spring.boot.data.batis.BaseJpaRepository;
 import wxdgaming.spring.boot.rant.entity.bean.RantInfo;
+
+import java.util.List;
 
 /**
  * 吐槽墙
@@ -12,5 +15,8 @@ import wxdgaming.spring.boot.rant.entity.bean.RantInfo;
  **/
 @Repository
 public interface RantRepository extends BaseJpaRepository<RantInfo, Long> {
+
+    @Query(value = "select t from RantInfo t where t.ipAddress is null or t.ipAddress=''")
+    List<RantInfo> findAllNullIp();
 
 }

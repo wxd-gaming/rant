@@ -137,7 +137,7 @@
             let c = $("#push_context").val();
             wxd.netty.post("/rant/push", "content=" + c, (response) => {
                 if (response.code === 1) {
-                    addItem(response.data.uid, response.data.content, response.data.time);
+                    addItem(response.data.uid, response.data.content, response.data.address, response.data.time);
 
                     $("#push_context").val("");
                     $(".push_bg").css({"display": "none"});
@@ -149,7 +149,7 @@
             });
         }
 
-        function addItem(uid, c, time) {
+        function addItem(uid, c, address, time) {
 
             var $rantBox = $(".rant_box");
 
@@ -172,7 +172,7 @@
 <div id="box_${uid}" class="item" style="background:#${bgColor};${box_flex}">
     <h3 class="title">匿名</h3>
     <pre class="content">${c}</pre>
-    <span>外星球 ${time} 关闭</span>
+    <span>${address} ${time} 关闭</span>
 </div>
             `;
 
@@ -213,7 +213,7 @@
                 (responseText) => {
                     $("#span_size").text(responseText.dataSize);
                     for (const row of responseText.data) {
-                        addItem(row.uid, row.content, row.time);
+                        addItem(row.uid, row.content, row.address, row.time);
                     }
                     actionBox();
                 },

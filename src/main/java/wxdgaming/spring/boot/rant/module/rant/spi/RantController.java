@@ -2,7 +2,6 @@ package wxdgaming.spring.boot.rant.module.rant.spi;
 
 import com.alibaba.fastjson2.JSONObject;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,9 +9,9 @@ import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.lang.RunResult;
 import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.boot.core.util.StringsUtil;
-import wxdgaming.spring.boot.rant.RantService;
 import wxdgaming.spring.boot.rant.entity.bean.RantInfo;
 import wxdgaming.spring.boot.rant.entity.store.RantRepository;
+import wxdgaming.spring.boot.rant.module.rant.RantService;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,8 +26,13 @@ import java.util.List;
 @RequestMapping("/rant")
 public class RantController {
 
-    @Autowired RantRepository rantRepository;
-    @Autowired RantService robotService;
+    final RantRepository rantRepository;
+    final RantService robotService;
+
+    public RantController(RantRepository rantRepository, RantService robotService) {
+        this.rantRepository = rantRepository;
+        this.robotService = robotService;
+    }
 
     @RequestMapping("/list")
     public RunResult list() {
@@ -41,7 +45,7 @@ public class RantController {
     JSONObject convert(RantInfo rantInfo) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("uid", rantInfo.getUid());
-        jsonObject.put("ip", rantInfo.getIp());
+        jsonObject.put("address", StringsUtil.emptyOrNull(rantInfo.getIpAddress()) ? "外星球" : rantInfo.getIpAddress());
         jsonObject.put("content", rantInfo.getContent());
         jsonObject.put("time", MyClock.formatDate("MM/dd HH:mm", rantInfo.getCreatedTime()));
         return jsonObject;
@@ -56,7 +60,9 @@ public class RantController {
             return RunResult.error("内容应该小于1000字");
         }
         String clientIp = SpringUtil.getClientIp();
-        RantInfo rantInfo = new RantInfo().setIp(clientIp).setContent(content.trim());
+        RantInfo rantInfo = new RantInfo()
+                .setIp(clientIp)
+                .setContent(content.trim());
         rantInfo.setUid(robotService.getGlobalData().rantNewId());
         rantInfo.setCreatedTime(MyClock.millis());
         rantRepository.save(rantInfo);

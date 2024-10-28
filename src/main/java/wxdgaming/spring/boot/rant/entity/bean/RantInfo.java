@@ -20,11 +20,15 @@ import wxdgaming.spring.boot.data.batis.EntityBase;
 @Accessors(chain = true)
 @Entity
 @Table(indexes = {
-        @Index(columnList = "accountId")
+        @Index(columnList = "accountId"),
+        @Index(columnList = "ip"),
+        @Index(columnList = "ipAddress"),
 })
 public class RantInfo extends EntityBase<Long> {
 
+    @Column(nullable = false, columnDefinition = "varchar(128) comment 'ip地址' ")
     private String ip;
+    @Column(nullable = false, columnDefinition = "varchar(128) default '' comment '例如四川.成都'")
     private String ipAddress;
     private int accountId;
     private boolean showNick = false;
