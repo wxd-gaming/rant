@@ -4,14 +4,125 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>wxdgaming.spring.boot</groupId>
+    <parent>
+        <groupId>wxdgaming.spring.boot</groupId>
+        <artifactId>wxdgaming.spring.boot</artifactId>
+        <version>1.0.1</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>rant</groupId>
     <artifactId>rant</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <encoding>UTF-8</encoding>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
+        <maven.compiler.encoding>${encoding}</maven.compiler.encoding>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.compilerVersion>${java.version}</maven.compiler.compilerVersion>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>public</id>
+            <url>https://maven.aliyun.com/repository/public</url>
+            <!--            <url>https://repo1.maven.org/maven2/</url>-->
+        </repository>
+        <repository>
+            <id>central</id>
+            <url>https://maven.aliyun.com/repository/central</url>
+            <!--            <url>https://repo1.maven.org/maven2/</url>-->
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>public</id>
+            <name>public</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>central</id>
+            <name>central</name>
+            <url>https://maven.aliyun.com/repository/central</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.core</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.data</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.data-batis</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.web</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.web-client</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>server</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>wxdgaming.spring.boot.rant.RantMain</mainClass>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>jar</id>
+            <properties>
+                <packaging-type>jar</packaging-type>
+            </properties>
+        </profile>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <mysql.host>localhost:3306/qq313796269</mysql.host>
+                <mysql-user>root</mysql-user>
+                <mysql-pwd>test</mysql-pwd>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

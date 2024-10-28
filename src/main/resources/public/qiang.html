@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>吐槽</title>
+    <script charset="utf-8" type="text/javascript" src="/jquery/2.1.4/jquery.min.js"></script>
+    <script charset="utf-8" type="text/javascript" src="/jquery-ui/1.13.1/jquery-ui.js"></script>
+    <script charset="utf-8" type="text/javascript" src="/js/com.wxd.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/style/com.wxd.css"/>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {width: 100%; height: 100%;
+            overflow: hidden;
+            background-image: linear-gradient(#B6E8DB, #15B0C9);
+        }
+
+        .item {
+            display: inline-block;
+            width: 260px;
+            height: 170px;
+            box-shadow: 0 2px 10px 1px #7F7F7F;
+            border-bottom-left-radius: 20px 500px;
+            border-bottom-right-radius: 500px 30px;
+            border-top-left-radius: 25px;
+            border-top-right-radius: 25px;
+            padding: 5px;
+            margin: 5px;
+            -webkit-user-select: none; /* webkit浏览器 */ -moz-user-select: none; /* Firefox */ -ms-user-select: none; /* IE10+ */ user-select: none; /* 标准语法 */
+        }
+
+        .title {width: 99%;display: block;padding-left: 15px; padding-bottom: 5px;}
+
+        .content {
+            display: block;
+            position: absolute;
+            overflow-y: auto;
+            /*border: #1c1c1c 1px solid;*/
+            box-sizing: border-box;
+            left: 10px;
+            top: 25px;
+            right: 10px;
+            bottom: 35px;
+        }
+
+        span {
+            color: white;
+            position: absolute;
+            height: 20px;
+            right: 8px;
+            bottom: 10px;
+            font-size: 14px;
+        }
+
+        .file {position: absolute;width: 100%;left: 0;top: 0;z-index: 99;padding-left: 15px;padding-top: 15px;height: 32px;}
+
+        .rant_box {
+            position: absolute;
+            left: 0;
+            top: 55px;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .push_box {
+            width: 35%;min-width: 300px;height: 430px;
+            position: absolute;
+            left: 50%;top: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background-color: #0F769F;
+            border-radius: 8px;
+            padding-top: 10px;
+        }
+
+        button {border: #1c1c1c 1px solid;width: 35px;height: 28px;}
+    </style>
+    <script>
+
+
+        /**
+         * 增加拖拽事件
+         * @param mbox_title 需要被拖拽的控件的子元素
+         */
+        function touchDraggable(mbox_title) {
+            $(mbox_title).on("touchstart", function (event) {
+                $(document.body).on("touchmove", function (event) {
+                    var touch = event.originalEvent.touches[0];
+                    var touchX = touch.pageX;
+                    var touchY = touch.pageY;
+                    // 在这里处理触摸移动事件
+                    $(mbox_title).css({
+                        "transform": "translate(0,0)",
+                        left: touchX + "px",
+                        top: touchY + "px"
+                    });
+                }).on("touchend", function () {
+                    $(this).off("touchmove");
+                });
+            }).on("touchend", function () {
+                // 在这里处理触摸结束事件
+                $(this).off("touchmove");
+            });
+        }
+
+
+        let last_click_item = null;
+
+        function changeZIndex(box) {
+            if (last_click_item != null) {
+                $(last_click_item).css({"z-index": 0});
+            }
+
+            last_click_item = box;
+            $(box).css({"z-index": 1});
+        }
+
+        // 返回一个整数随机数，范围为min到max（包括min和max）
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        }
+
+        function getRandomHex() {
+            return Math.floor(Math.random() * 16777216).toString(16); // 16777216 (0x1000000) 是 256*256*256
+        }
+
+        function push() {
+            let c = $("#push_context").val();
+            wxd.netty.post("/rant/push", "content=" + c, (response) => {
+                if (response.code === 1) {
+                    addItem(response.data.uid, response.data.content, response.data.time);
+
+                    $("#push_context").val("");
+                    $(".push_bg").css({"display": "none"});
+
+                    actionBox();
+                } else {
+                    wxd.message.notice(response.error);
+                }
+            });
+        }
+
+        function addItem(uid, c, time) {
+
+            var $rantBox = $(".rant_box");
+
+            let width = $rantBox.width();
+            let height = $rantBox.height();
+
+            let box_width = 260;
+            let box_height = 160;
+
+            let bgColor = getRandomHex();
+
+            let bgLeft = (getRandomInt(10, width - box_width - 20));
+            let bgTop = (getRandomInt(10, height - box_height - 20));
+
+            let box_flex = "";
+            if ($("#sel_flex").val() === "随机") {
+                box_flex = `position: absolute;left: ${bgLeft}px;top: ${bgTop}px;`
+            }
+            let box = `
+<div id="box_${uid}" class="item" style="background:#${bgColor};${box_flex}">
+    <h3 class="title">匿名</h3>
+    <pre class="content">${c}</pre>
+    <span>外星球 ${time} 关闭</span>
+</div>
+            `;
+
+            $rantBox.append(box);
+        }
+
+        function actionBox() {
+            $(".title").each((i, box) => {
+
+                $(box).parent().on("mousedown", (e) => {
+                    changeZIndex($(box).parent());
+                });
+
+                $($(box).parent()).draggable();
+                $($(box).parent()).find("span:first").click(function (e) {
+                    $(this).parent().remove();
+                });
+
+                touchDraggable($(box).parent());
+            });
+        }
+
+        function changeFlex() {
+            localStorage.setItem("flex", $("#sel_flex").val());
+            window.location.reload();
+        }
+
+        $(() => {
+
+            var item = localStorage.getItem("flex");
+            if (wxd.notNull(item)) {
+                $("#sel_flex").val(item);
+                if (item === "窗格") {
+                    $(".rant_box").css({"overflow": "auto"});
+                }
+            }
+            wxd.netty.post("/rant/list", "",
+                (responseText) => {
+                    $("#span_size").text(responseText.dataSize);
+                    for (const row of responseText.data) {
+                        addItem(row.uid, row.content, row.time);
+                    }
+                    actionBox();
+                },
+                (error) => {
+
+                }
+            );
+        });
+    </script>
+</head>
+
+<body>
+<div class="file">
+    <select id="sel_flex" onchange="changeFlex()">
+        <option value="随机">随机</option>
+        <option value="窗格">窗格</option>
+    </select>
+    <button value="发布" onclick="$('.push_bg').css({'display':'block'})">发布</button>
+    <button value="发布" onclick="window.location.reload();">刷新</button>
+    总共<label id="span_size" style="padding: 3px 7px;margin: 0 5px;border: #555454 1px solid;background-color: white;">0</label>条
+</div>
+<div class="push_bg" style="display: none; position: absolute;background: rgba(69, 68, 68, 0.2); width: 100%;height: 100%;left: 0;top: 0; z-index: 999999;">
+    <div class="push_box">
+        <div style="position:absolute ;left:10px;right:10px;box-sizing: border-box;">
+            <textarea id="push_context" style="width: 100%;min-width: 280px;height: 360px;border-radius: 5px; border: #4c4c4c 2px solid;display: block;"></textarea>
+            <br>
+            <button onclick="push()">发布</button>
+        </div>
+    </div>
+</div>
+<div class="rant_box">
+    <!--    <div class="item" style="background:#E3E197">-->
+    <!--        <h3 class="title">抬头</h3>-->
+    <!--        <pre class="content">这是第一个便签</pre>-->
+    <!--        <span>重庆 10/27 22:22 关闭</span>-->
+    <!--    </div>-->
+
+    <!--    <div class="item" style="background: #F8B3D0;">-->
+    <!--        <p class="title">抬头</p>-->
+    <!--        <p class="content">这是第一个便签</p>-->
+    <!--        <span>2024/10/27 22:22 关闭</span>-->
+    <!--    </div>-->
+    <!--    <div class="item" style="background: #F8B3D0;">-->
+    <!--        <p class="title">抬头</p>-->
+    <!--        <p class="content">这是第一个便签</p>-->
+    <!--        <span>2024/10/27 22:22 关闭</span>-->
+    <!--    </div>-->
+    <!--    <div class="item" style="background: #F8B3D0;">-->
+    <!--        <p class="title">抬头</p>-->
+    <!--        <p class="content">这是第一个便签</p>-->
+    <!--        <span>2024/10/27 22:22 关闭</span>-->
+    <!--    </div>-->
+    <!--    <div class="item" style="background: #F8B3D0;">-->
+    <!--        <p class="title">抬头</p>-->
+    <!--        <p class="content">这是第一个便签</p>-->
+    <!--        <span>2024/10/27 22:22 关闭</span>-->
+    <!--    </div>-->
+    <!--    <div class="item" style="background: #F8B3D0;">-->
+    <!--        <p class="title">抬头</p>-->
+    <!--        <p class="content">这是第一个便签</p>-->
+    <!--        <span>2024/10/27 22:22 关闭</span>-->
+    <!--    </div>-->
+    <!--    <div class="item" style="background: #F8B3D0;">-->
+    <!--        <p class="title">抬头</p>-->
+    <!--        <p class="content">这是第一个便签</p>-->
+    <!--        <span>2024/10/27 22:22 关闭</span>-->
+    <!--    </div>-->
+    <!--    <div class="item" style="background: #F8B3D0;">-->
+    <!--        <p class="title">抬头</p>-->
+    <!--        <p class="content">这是第一个便签</p>-->
+    <!--        <span>2024/10/27 22:22 关闭</span>-->
+    <!--    </div>-->
+
+    <!--<div class="item" style="background: #BBE1F1;">-->
+    <!--    <p class="title">抬头</p>-->
+    <!--    <p class="content">这是第一个便签</p>-->
+    <!--    <span>2024/10/27 22:22 关闭</span>-->
+    <!--</div>-->
+</div>
+</body>
+
+</html>

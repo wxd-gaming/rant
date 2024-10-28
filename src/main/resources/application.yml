@@ -1,0 +1,37 @@
+server:
+  port: 8081   #端口号
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 10
+  executor:
+    defaultCoreSize: 2 #默认线程池
+    logicCoreSize: 10 #逻辑线程池
+
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  profiles:
+    active: mysql-dev
+  web:
+    resources:
+      static-locations: classpath:/public/
+  mvc:
+    static-path-pattern: /**
+  thymeleaf:
+    cache: false                            # 是否开启缓存默认为true
+    prefix: classpath:/templates/           #设置thymeleaf路径默认为src/main/resources/templates
+    suffix: .html                           # 设置thymeleaf模板后缀
+    content-type: text/html
+    mode: LEGACYHTML5                       # 设置thymeleaf严格校验
+    encoding: UTF-8                         # 设置编码
+
+  servlet:
+    multipart: # 文件上传配置
+      max-file-size: 20MB
+      max-request-size: 100MB
+      enabled: true
+  task:
+    scheduling: # 定时任务线程池配置
+      pool:
+        size: 2
