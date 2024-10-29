@@ -18,21 +18,10 @@ spring:
   web:
     resources:
       static-locations: classpath:/public/
-  mvc:
-    static-path-pattern: /**
-  thymeleaf:
-    cache: false                            # 是否开启缓存默认为true
-    prefix: classpath:/templates/           #设置thymeleaf路径默认为src/main/resources/templates
-    suffix: .html                           # 设置thymeleaf模板后缀
-    content-type: text/html
-    mode: LEGACYHTML5                       # 设置thymeleaf严格校验
-    encoding: UTF-8                         # 设置编码
 
   servlet:
     multipart: # 文件上传配置
-      max-file-size: 20MB
-      max-request-size: 100MB
-      enabled: true
+      enabled: false
   task:
     scheduling: # 定时任务线程池配置
       pool:

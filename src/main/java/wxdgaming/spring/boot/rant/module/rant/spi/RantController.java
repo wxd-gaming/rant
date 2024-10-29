@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.lang.RunResult;
 import wxdgaming.spring.boot.core.timer.MyClock;
+import wxdgaming.spring.boot.core.util.HtmlDecoder;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.rant.entity.bean.RantInfo;
 import wxdgaming.spring.boot.rant.entity.store.RantRepository;
@@ -36,6 +37,7 @@ public class RantController {
 
     @RequestMapping("/list")
     public RunResult list(@RequestParam(name = "sort", required = false, defaultValue = "随机") String sort) {
+        sort = HtmlDecoder.escapeHtml3(sort);
         List<RantInfo> all = rantRepository.findAll();
         if ("随机".equals(sort)) {
             Collections.shuffle(all);
@@ -59,6 +61,7 @@ public class RantController {
 
     @RequestMapping("/push")
     public RunResult push(HttpServletRequest request, @RequestParam String content) {
+        content = HtmlDecoder.escapeHtml3(content);
         if (StringsUtil.emptyOrNull(content)) {
             return RunResult.error("内容不能空");
         }

@@ -218,9 +218,13 @@
             wxd.netty.post("/rant/list", "sort=" + sort,
                 (responseText) => {
                     $("#span_size").text(responseText.dataSize);
-                    for (const row of responseText.data) {
+                    wxd.delayed((index) => {
+                        const row = responseText.data[index];
                         addItem(row.uid, row.content, row.address, row.time);
-                    }
+                    }, 50, responseText.data.length);
+                    // for (const row of responseText.data) {
+                    //     addItem(row.uid, row.content, row.address, row.time);
+                    // }
                     actionBox();
                 },
                 (error) => {
