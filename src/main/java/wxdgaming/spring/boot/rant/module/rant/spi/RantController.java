@@ -35,9 +35,15 @@ public class RantController {
     }
 
     @RequestMapping("/list")
-    public RunResult list() {
+    public RunResult list(@RequestParam(name = "sort", required = false, defaultValue = "随机") String sort) {
         List<RantInfo> all = rantRepository.findAll();
-        Collections.shuffle(all);
+        if ("随机".equals(sort)) {
+            Collections.shuffle(all);
+        } else if ("倒序".equals(sort)) {
+            all.sort((o1, o2) -> Long.compare(o2.getCreatedTime(), o1.getCreatedTime()));
+        } else if ("正序".equals(sort)) {
+            all.sort((o1, o2) -> Long.compare(o1.getCreatedTime(), o2.getCreatedTime()));
+        }
         List<JSONObject> list = all.stream().map(this::convert).limit(300).toList();
         return RunResult.ok().data(list).fluentPut("dataSize", all.size());
     }
@@ -62,6 +68,7 @@ public class RantController {
         String clientIp = SpringUtil.getClientIp();
         RantInfo rantInfo = new RantInfo()
                 .setIp(clientIp)
+                .setIpAddress("")
                 .setContent(content.trim());
         rantInfo.setUid(robotService.getGlobalData().rantNewId());
         rantInfo.setCreatedTime(MyClock.millis());

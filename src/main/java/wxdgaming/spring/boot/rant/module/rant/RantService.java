@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.system.DumpUtil;
 import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.rant.entity.bean.GlobalData;
@@ -62,6 +63,13 @@ public class RantService implements InitPrint, AutoCloseable, Closeable {
 
     @Override public void close() {
         saveAndFlush();
+    }
+
+    @Scheduled(cron = "0 */1 * * * ?")
+    public void showMemory() {
+        StringBuilder stringBuilder = new StringBuilder();
+        DumpUtil.freeMemory(stringBuilder);
+        log.info("{}", stringBuilder);
     }
 
     @Scheduled(cron = "0 */5 * * * ?")

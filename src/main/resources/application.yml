@@ -1,7 +1,10 @@
 server:
   port: 8081   #端口号
   tomcat:
-    max-threads: 200
+    initial-size: 64 #初始化内存
+    min-free-size: 64 #最小内存
+    max-size: 128     #最小内存
+    max-threads: 100
     min-spare-threads: 10
   executor:
     defaultCoreSize: 2 #默认线程池
