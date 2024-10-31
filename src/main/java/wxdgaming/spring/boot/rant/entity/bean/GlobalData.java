@@ -21,6 +21,8 @@ public class GlobalData extends EntityBase<Integer> {
 
     @Column(nullable = false, columnDefinition = "bigint default 10000")
     private long rantNewId = 10000;
+    @Column(nullable = false, columnDefinition = "bigint default 10000")
+    private long replyNewId = 10000;
 
     public GlobalData() {
         this.setUid(1);
@@ -28,6 +30,10 @@ public class GlobalData extends EntityBase<Integer> {
 
     public synchronized long rantNewId() {
         return ++rantNewId;
+    }
+
+    public synchronized long replyNewId() {
+        return ++replyNewId;
     }
 
 }

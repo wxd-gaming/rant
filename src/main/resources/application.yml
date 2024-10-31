@@ -3,9 +3,13 @@ server:
   tomcat:
     initial-size: 64 #初始化内存
     min-free-size: 64 #最小内存
-    max-size: 128     #最小内存
+    max-size: 256     #最小内存
     max-threads: 100
     min-spare-threads: 10
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/javascript,text/css,image/png
+    min-response-size: 1024
   executor:
     defaultCoreSize: 2 #默认线程池
     logicCoreSize: 10 #逻辑线程池
@@ -17,7 +21,14 @@ spring:
     active: mysql-dev
   web:
     resources:
+      add-mappings: true
       static-locations: classpath:/public/
+      chain:
+        compressed: true    #开启压缩
+        enabled: true       #开启
+        cache: true         #开启缓存
+      cache:
+        period: 186400      # 缓存一天
 
   servlet:
     multipart: # 文件上传配置
@@ -26,3 +37,6 @@ spring:
     scheduling: # 定时任务线程池配置
       pool:
         size: 2
+  threads:
+    virtual:
+      enabled: false

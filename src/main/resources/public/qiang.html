@@ -18,6 +18,7 @@
             background-image: linear-gradient(#B6E8DB, #15B0C9);
         }
 
+
         .item {
             display: inline-block;
             position: relative;
@@ -33,7 +34,9 @@
             -webkit-user-select: none; /* webkit浏览器 */ -moz-user-select: none; /* Firefox */ -ms-user-select: none; /* IE10+ */ user-select: none; /* 标准语法 */
         }
 
-        .item .title {width: 99%;display: block;padding-left: 15px; padding-bottom: 5px;}
+        .item .title {display: inline-block;padding-left: 15px; padding-bottom: 5px;}
+
+        .item p {display: inline-block;padding-left: 15px; padding-bottom: 5px;color: white;}
 
         .item .content {
             display: block;
@@ -48,9 +51,13 @@
             text-wrap: auto;
             word-break: break-all;
             white-space: pre-wrap;
+            letter-spacing: 2px; /* 增加字符间距 */
+            /*color: white; !* 文字颜色 *!*/
+            /*text-shadow: 5px 3px 5px black; !* 阴影效果 *!*/
+            /*-webkit-text-stroke: 1px #000000; !* 描边颜色和宽度 *!*/
         }
 
-        .item span {
+        .item label {
             color: white;
             position: absolute;
             height: 20px;
@@ -58,6 +65,14 @@
             bottom: 10px;
             font-size: 14px;
         }
+
+        .rant label a:link, .rant label a:visited {color: #720000;}
+
+        .rant label a {margin-right: 5px;margin-left: 5px;color: #720000; }
+
+        .rant label * {vertical-align: middle;}
+
+        .rant label a img {width: 24px;height: 24px;}
 
         .rant_box {
             position: absolute;
@@ -83,6 +98,39 @@
 
         .file select, .file button {margin-right: 5px;height: 28px;padding: 5px 7px;border: #9f9f9f 1px solid;border-radius: 5px;}
 
+        .reply_box pre {
+            /*display: block;*/
+            overflow-y: auto;
+            /*border: #1c1c1c 1px solid;*/
+            background-color: #ffffff;
+            box-sizing: border-box;
+            margin: 8px 5px -10px 2px;
+            border-radius: 8px;
+            text-wrap: auto;
+            word-break: break-all;
+            white-space: pre-wrap;
+            padding: 5px;
+            letter-spacing: 2px; /* 增加字符间距 */
+            /*color: white; !* 文字颜色 *!*/
+            /*text-shadow: 5px 3px 5px black; !* 阴影效果 *!*/
+            /*-webkit-text-stroke: 1px #000000; !* 描边颜色和宽度 *!*/
+        }
+
+        .reply_box label {
+            display: block;
+            color: white;
+            height: 20px;
+            font-size: 14px;
+            margin-top: 15px;
+            margin-left: 5px;
+        }
+
+        .reply_box p {display: inline-block;padding-left: 15px; color: white;}
+
+        .reply_bg {
+            background-color: #5e5e5e; padding: 10px 0 10px 0px;margin-top: 15px;margin-left: 4px;position: relative;width: calc(100% - 10px);
+            border-radius: 7px;
+        }
     </style>
     <script>
 
@@ -129,15 +177,31 @@
             return Math.floor(Math.random() * (max - min + 1) + min);
         }
 
-        function getRandomHex() {
-            return Math.floor(Math.random() * 16777216).toString(16); // 16777216 (0x1000000) 是 256*256*256
+        /*!----感谢老板娘友情提供---*/
+        let ColorValues = [
+            "f6a5a5", "f6a5c2", "f6a5d8", "f6a5ed",
+            "e0a5f6", "c0a5f6", "b0a5f6", "a5b4f6",
+            "a5d3f6", "a5eff6", "a5f6d7", "a5f6b2",
+            "d1f6a5", "f6eca5", "f6cfa5", "f97d68",
+            "f7ab59", "e58927", "f6c828", "b5e248",
+            "48dde2", "4885e2", "484be2", "8d48e2",
+            "bb3c3c"
+        ];
+
+        /**
+         * 获取一个随机颜色值
+         * @returns {string} 颜色代码
+         */
+        function getRandomColor() {
+            return ColorValues[Math.floor(Math.random() * ColorValues.length)];
         }
 
         function push() {
             let c = $("#push_context").val();
             wxd.netty.post("/rant/push", "content=" + c, (response) => {
                 if (response.code === 1) {
-                    addItem(response.data.uid, response.data.content, response.data.address, response.data.time);
+                    var row = response.data;
+                    addItem(row);
 
                     $("#push_context").val("");
                     $(".push_bg").css({"display": "none"});
@@ -149,8 +213,27 @@
             });
         }
 
-        function addItem(uid, c, address, time) {
+        function like(element, uid) {
+            wxd.netty.post("/rant/like", "uid=" + uid, (response) => {
+                if (response.code === 1) {
+                    $("#span_like_" + uid).text("(" + response.data + ")");
+                } else {
+                    wxd.message.notice(response.error);
+                }
+            });
+        }
 
+        function dislike(element, uid) {
+            wxd.netty.post("/rant/dislike", "uid=" + uid, (response) => {
+                if (response.code === 1) {
+                    $("#span_dislike_" + uid).text("(" + response.data + ")");
+                } else {
+                    wxd.message.notice(response.error);
+                }
+            });
+        }
+
+        function addItem(row) {
             var $rantBox = $(".rant_box");
 
             let width = $rantBox.width();
@@ -159,7 +242,7 @@
             let box_width = 260;
             let box_height = 160;
 
-            let bgColor = getRandomHex();
+            let bgColor = getRandomColor();
 
             let bgLeft = (getRandomInt(10, width - box_width - 20));
             let bgTop = (getRandomInt(10, height - box_height - 20));
@@ -169,10 +252,16 @@
                 box_flex = `position: absolute;left: ${bgLeft}px;top: ${bgTop}px;`
             }
             let box = `
-<div id="box_${uid}" class="item" style="background:#${bgColor};${box_flex}">
+<div id="box_${row.uid}" class="rant item" style="background:#${bgColor};${box_flex}">
     <h3 class="title">匿名</h3>
-    <pre class="content" tips="true">${c}</pre>
-    <span onclick="$(this).parent().remove();">${address} ${time} 关闭</span>
+    <p>${row.time}</p>
+    <pre class="content" tips="true">${row.content}</pre>
+    <label>
+        <a href="javascript:void(0)" onclick="like(this,${row.uid})"><img src="img/like.png" alt="赞"/></a><span id="span_like_${row.uid}">(${row.likeCount})</span>
+        <a href="javascript:void(0)" onclick="dislike(this,${row.uid})"><img src="img/dislike.png" alt="赞"/></a><span id="span_dislike_${row.uid}">(${row.dislikeCount})</span>
+        ${row.address}
+        <a href="javascript:void(0)" onclick="closeBox(this,${row.uid})">关闭</a>
+    </label>
 </div>
             `;
 
@@ -180,7 +269,9 @@
         }
 
         function actionBox() {
-            if ($("#sel_flex").val() === "随机") {
+            //获取当前布局信息
+            var val = $("#sel_flex").val();
+            if (val === "随机") {
                 $(".title").each((i, box) => {
 
                     $(box).parent().on("mousedown", (e) => {
@@ -201,8 +292,28 @@
             window.location.reload();
         }
 
-        $(() => {
+        function userData() {
+            let map = new wxd.Map();
+            let userData = localStorage.getItem("user-data");
+            if (wxd.notNull(userData)) {
+                map.parse(userData);
+            }
+            return map;
+        }
 
+        function closeBox(item, uid) {
+            var map = userData();
+            map.put(uid, true);
+            localStorage.setItem("user-data", map.toJson());
+            $(item).parent().parent().remove();
+        }
+
+        function refresh() {
+            localStorage.removeItem("user-data");
+            window.location.reload();
+        }
+
+        $(() => {
             var flex = localStorage.getItem("flex");
             if (wxd.notNull(flex)) {
                 $("#sel_flex").val(flex);
@@ -216,11 +327,15 @@
                 $("#sel_sort").val(sort);
             }
             wxd.netty.post("/rant/list", "sort=" + sort,
-                (responseText) => {
+                async (responseText) => {
                     $("#span_size").text(responseText.dataSize);
-                    wxd.delayed((index) => {
+                    let ud = userData();
+                    await wxd.delayed((index) => {
                         const row = responseText.data[index];
-                        addItem(row.uid, row.content, row.address, row.time);
+                        if (ud.get(row.uid) === true) {
+                            return;
+                        }
+                        addItem(row);
                     }, 50, responseText.data.length);
                     // for (const row of responseText.data) {
                     //     addItem(row.uid, row.content, row.address, row.time);
@@ -247,9 +362,11 @@
         <option value="随机">随机</option>
         <option value="倒序">倒序</option>
         <option value="正序">正序</option>
+        <option value="点赞">点赞</option>
+        <option value="点踩">点踩</option>
     </select>
     <button value="发布" onclick="$('.push_bg').css({'display':'block'})">发布</button>
-    <button value="发布" onclick="window.location.reload();">刷新</button>
+    <button value="发布" onclick="refresh();">刷新</button>
     <div style="margin-top: 2px;display: inline-block;">
         总共<label id="span_size" style="padding: 3px 7px;margin: 0 5px;border: #555454 1px solid;background-color: white;">0</label>条
     </div>
@@ -260,15 +377,54 @@
             <textarea id="push_context" style="width: 100%;min-width: 280px;height: 360px;border-radius: 5px; border: #4c4c4c 2px solid;display: block;"></textarea>
             <br>
             <button onclick="push()">发布</button>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <button onclick="$('.push_bg').css({'display':'none'})">关闭</button>
         </div>
     </div>
 </div>
 <div class="rant_box">
-    <!--    <div class="item" style="background:#E3E197">-->
-    <!--        <h3 class="title">抬头</h3>-->
-    <!--        <pre class="content">这是第一个便签</pre>-->
-    <!--        <span onclick="$(this).parent().remove();">重庆 10/27 22:22 关闭</span>-->
-    <!--    </div>-->
+    <div class="rant item" style="background:#E3E197;">
+        <h3 class="title">温馨提示</h3>
+        <p>10/27 22:22</p>
+        <pre class="content" tips="true">当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。</pre>
+        <label>
+            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
+            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
+            外星球
+            <a href="javascript:void(0)" onclick="$(this).parent().parent().remove();">关闭</a>
+        </label>
+    </div>
+</div>
+<div class="rant reply_box" style="position: absolute;width: 350px;right: 0;top: 38px;bottom: 38px;background-color: wheat;border-radius: 20px 0 0 20px;">
+    <div>
+        <pre class="content" tips="true">当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。</pre>
+        <label>
+            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
+            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
+            外星球
+            10/27 22:22
+        </label>
+    </div>
+    <div class="reply_bg">
+        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
+        <pre tips="true">当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。</pre>
+        <label>
+            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
+            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
+            <span>外星球</span>
+            <span>10/27 22:22</span>
+        </label>
+    </div>
+    <div class="reply_bg">
+        <span style="position: absolute;left: 2px; top: 0px;">#2</span>
+        <pre tips="true">当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。</pre>
+        <label>
+            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
+            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
+            <span>外星球</span>
+            <span>10/27 22:22</span>
+        </label>
+    </div>
 </div>
 </body>
 

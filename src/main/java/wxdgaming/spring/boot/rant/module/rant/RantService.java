@@ -11,8 +11,10 @@ import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.rant.entity.bean.GlobalData;
 import wxdgaming.spring.boot.rant.entity.bean.RantInfo;
+import wxdgaming.spring.boot.rant.entity.bean.ReplyInfo;
 import wxdgaming.spring.boot.rant.entity.store.GlobalRepository;
 import wxdgaming.spring.boot.rant.entity.store.RantRepository;
+import wxdgaming.spring.boot.rant.entity.store.ReplyRepository;
 import wxdgaming.spring.boot.webclient.HttpClientService;
 import wxdgaming.spring.boot.webclient.IPInfo;
 
@@ -33,13 +35,17 @@ public class RantService implements InitPrint, AutoCloseable, Closeable {
 
     final GlobalRepository globalRepository;
     final RantRepository rantRepository;
+    final ReplyRepository replyRepository;
     private final HttpClientService httpClientService;
     private GlobalData globalData;
 
-    public RantService(RantRepository rantRepository, GlobalRepository globalRepository, HttpClientService httpClientService) {
+    public RantService(GlobalRepository globalRepository, HttpClientService httpClientService,
+                       RantRepository rantRepository,
+                       ReplyRepository replyRepository) {
         this.rantRepository = rantRepository;
         this.globalRepository = globalRepository;
         this.httpClientService = httpClientService;
+        this.replyRepository = replyRepository;
     }
 
     @PostConstruct
@@ -72,7 +78,7 @@ public class RantService implements InitPrint, AutoCloseable, Closeable {
         log.info("{}", stringBuilder);
     }
 
-    @Scheduled(cron = "0 */5 * * * ?")
+    @Scheduled(cron = "0 */2 * * * ?")
     public void actionIp() {
         List<RantInfo> allNullIp = rantRepository.findAllNullIp();
         for (RantInfo rantInfo : allNullIp) {
@@ -91,6 +97,25 @@ public class RantService implements InitPrint, AutoCloseable, Closeable {
                     log.warn("ip查询失败{}", ignore.toString());
                 }
                 rantRepository.saveAndFlush(rantInfo);
+            }
+        }
+        List<ReplyInfo> allNullIp1 = replyRepository.findAllNullIp();
+        for (ReplyInfo replyInfo : allNullIp1) {
+            if (StringsUtil.emptyOrNull(replyInfo.getIpAddress())) {
+                try {
+                    if ("127.0.0.1".equals(replyInfo.getIp())
+                        || "localhost".equalsIgnoreCase(replyInfo.getIp())
+                        || replyInfo.getIp().startsWith("192.168")) {
+                        replyInfo.setIpAddress("内网");
+                    } else {
+                        IPInfo city4Ip = httpClientService.getCity4Ip(replyInfo.getIp());
+                        replyInfo.setIpAddress(city4Ip.getRegionName() + "." + city4Ip.getCity());
+                    }
+                } catch (Exception ignore) {
+                    replyInfo.setIpAddress("外星球");
+                    log.warn("ip查询失败{}", ignore.toString());
+                }
+                replyRepository.saveAndFlush(replyInfo);
             }
         }
     }

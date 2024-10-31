@@ -10,29 +10,31 @@ import lombok.experimental.Accessors;
 import wxdgaming.spring.boot.data.batis.EntityBase;
 
 /**
- * 吐槽墙
+ * 回复详情
  *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-10-27 18:06
- */
+ * @version: 2024-10-30 19:09
+ **/
 @Getter
 @Setter
 @Accessors(chain = true)
 @Entity
 @Table(indexes = {
-        @Index(columnList = "accountId"),
+        @Index(columnList = "rantId"),
+        @Index(columnList = "replyId"),
         @Index(columnList = "ip"),
         @Index(columnList = "ipAddress"),
 })
-public class RantInfo extends EntityBase<Long> {
-
-    @Column(nullable = false, columnDefinition = "varchar(128) comment 'ip地址' ")
+public class ReplyInfo extends EntityBase<Long> {
+    /** 当前回复是那个贴贴下面的 */
+    private long rantId;
+    /** 可能是回复某个贴贴里面的回复 */
+    private long replyId;
+    @Column(columnDefinition = "varchar(64) comment 'ip'")
     private String ip;
-    @Column(nullable = false, columnDefinition = "varchar(128) default '' comment '例如四川.成都'")
+    @Column(columnDefinition = "varchar(128) comment 'ip'")
     private String ipAddress;
-    private int accountId;
-    private boolean showNick = false;
-    @Column(columnDefinition = "varchar(1024) comment '吐槽内容，不得超过1000个字'")
+    @Column(columnDefinition = "varchar(1024) comment '内容，不得超过1000个字'")
     private String content;
     @Column(columnDefinition = "int default 0 comment '点赞数'")
     private long likeCount;

@@ -11,11 +11,13 @@ import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.boot.core.util.HtmlDecoder;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.rant.entity.bean.RantInfo;
+import wxdgaming.spring.boot.rant.entity.bean.ReplyInfo;
 import wxdgaming.spring.boot.rant.entity.store.RantRepository;
+import wxdgaming.spring.boot.rant.entity.store.ReplyRepository;
 import wxdgaming.spring.boot.rant.module.rant.RantService;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 吐槽接口
@@ -24,65 +26,31 @@ import java.util.List;
  * @version: 2024-10-27 18:15
  **/
 @RestController
-@RequestMapping("/rant")
-public class RantController {
+@RequestMapping("/reply")
+public class ReplyController {
 
     final RantRepository rantRepository;
+    final ReplyRepository replyRepository;
     final RantService robotService;
 
-    public RantController(RantRepository rantRepository, RantService robotService) {
+    public ReplyController(RantRepository rantRepository, RantService robotService, ReplyRepository replyRepository) {
         this.rantRepository = rantRepository;
         this.robotService = robotService;
+        this.replyRepository = replyRepository;
     }
 
     @RequestMapping("/list")
-    public RunResult list(@RequestParam(name = "sort", required = false, defaultValue = "随机") String sort) {
-        sort = HtmlDecoder.escapeHtml3(sort);
-        List<RantInfo> all = rantRepository.findAll();
-        if ("随机".equals(sort)) {
-            Collections.shuffle(all);
-        } else if ("倒序".equals(sort)) {
-            all.sort((o1, o2) -> {
-                if (!o2.getCreatedTime().equals(o1.getCreatedTime())) {
-                    return Long.compare(o2.getCreatedTime(), o1.getCreatedTime());
-                }
-                return Long.compare(o2.getUid(), o1.getUid());
-            });
-        } else if ("正序".equals(sort)) {
-            all.sort((o1, o2) -> {
-                if (!o1.getCreatedTime().equals(o2.getCreatedTime())) {
-                    return Long.compare(o1.getCreatedTime(), o2.getCreatedTime());
-                }
-                return Long.compare(o1.getUid(), o2.getUid());
-            });
-        } else if ("点赞".equals(sort)) {
-            all.sort((o1, o2) -> {
-                if (o2.getLikeCount() != o1.getLikeCount()) {
-                    return Long.compare(o2.getLikeCount(), o1.getLikeCount());
-                }
-                if (!o2.getCreatedTime().equals(o1.getCreatedTime())) {
-                    return Long.compare(o2.getCreatedTime(), o1.getCreatedTime());
-                }
-                return Long.compare(o2.getUid(), o1.getUid());
-            });
-        } else if ("点踩".equals(sort)) {
-            all.sort((o1, o2) -> {
-                if (o2.getDislikeCount() != o1.getDislikeCount()) {
-                    return Long.compare(o2.getDislikeCount(), o1.getDislikeCount());
-                }
-                if (!o2.getCreatedTime().equals(o1.getCreatedTime())) {
-                    return Long.compare(o2.getCreatedTime(), o1.getCreatedTime());
-                }
-                return Long.compare(o2.getUid(), o1.getUid());
-            });
-        }
-        List<JSONObject> list = all.stream().map(this::convert).limit(300).toList();
-        return RunResult.ok().data(list).fluentPut("dataSize", all.size());
+    public RunResult list(@RequestParam(name = "rantId") long rantId) {
+        List<ReplyInfo> allByRantId = replyRepository.findAllByRantId(rantId);
+        List<JSONObject> list = allByRantId.stream().map(this::convert).toList();
+        return RunResult.ok().data(list).fluentPut("dataSize", allByRantId.size());
     }
 
-    JSONObject convert(RantInfo rantInfo) {
+    JSONObject convert(ReplyInfo rantInfo) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("uid", rantInfo.getUid());
+        jsonObject.put("rantId", rantInfo.getRantId());
+        jsonObject.put("replyId", rantInfo.getReplyId());
         jsonObject.put("address", StringsUtil.emptyOrNull(rantInfo.getIpAddress()) ? "外星球" : rantInfo.getIpAddress());
         jsonObject.put("content", rantInfo.getContent());
         jsonObject.put("time", MyClock.formatDate("MM/dd HH:mm", rantInfo.getCreatedTime()));
@@ -92,7 +60,11 @@ public class RantController {
     }
 
     @RequestMapping("/push")
-    public RunResult push(HttpServletRequest request, @RequestParam String content) {
+    public RunResult push(HttpServletRequest request,
+                          @RequestParam(name = "rantId") Long rantId,
+                          @RequestParam(name = "replyId", required = false, defaultValue = "0") Long replyId,
+                          @RequestParam(name = "content") String content) {
+
         content = HtmlDecoder.escapeHtml3(content);
         if (StringsUtil.emptyOrNull(content)) {
             return RunResult.error("内容不能空");
@@ -100,40 +72,52 @@ public class RantController {
         if (content.trim().length() > 1024) {
             return RunResult.error("内容应该小于1000字");
         }
+
+        Optional<RantInfo> byId = rantRepository.findById(rantId);
+        if (byId.isEmpty()) {
+            return RunResult.error("找不到记录");
+        }
+        if (replyId > 0) {
+            if (replyRepository.findById(replyId).isEmpty()) {
+                return RunResult.error("找不到回复记录");
+            }
+        }
         String clientIp = SpringUtil.getClientIp();
-        RantInfo rantInfo = new RantInfo()
+        ReplyInfo rantInfo = new ReplyInfo()
+                .setRantId(rantId)
+                .setReplyId(replyId)
                 .setIp(clientIp)
                 .setIpAddress("")
                 .setContent(content.trim());
-        rantInfo.setUid(robotService.getGlobalData().rantNewId());
+        rantInfo.setUid(robotService.getGlobalData().replyNewId());
         rantInfo.setCreatedTime(MyClock.millis());
-        rantRepository.save(rantInfo);
+        replyRepository.save(rantInfo);
         robotService.saveAndFlush();
         return RunResult.ok().data(convert(rantInfo));
     }
 
     @RequestMapping("/like")
     public RunResult like(@RequestParam(name = "uid") Long uid) {
-        RantInfo rantInfo = rantRepository.findById(uid).orElse(null);
+        ReplyInfo rantInfo = replyRepository.findById(uid).orElse(null);
         if (rantInfo == null) {
             return RunResult.error("找不到记录");
         }
         synchronized (rantInfo.getUid().toString().intern()) {
             rantInfo.setLikeCount(Math.addExact(rantInfo.getLikeCount(), 1));
-            rantRepository.save(rantInfo);
+            replyRepository.save(rantInfo);
         }
         return RunResult.ok().data(rantInfo.getLikeCount());
     }
 
     @RequestMapping("/dislike")
     public RunResult dislike(@RequestParam(name = "uid") Long uid) {
-        RantInfo rantInfo = rantRepository.findById(uid).orElse(null);
+        ReplyInfo rantInfo = replyRepository.findById(uid).orElse(null);
         if (rantInfo == null) {
             return RunResult.error("找不到记录");
         }
         synchronized (rantInfo.getUid().toString().intern()) {
             rantInfo.setDislikeCount(Math.addExact(rantInfo.getDislikeCount(), 1));
-            rantRepository.save(rantInfo);
+            replyRepository.save(rantInfo);
         }
         return RunResult.ok().data(rantInfo.getDislikeCount());
     }
