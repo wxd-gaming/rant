@@ -99,14 +99,18 @@
         .file select, .file button {margin-right: 5px;height: 28px;padding: 5px 7px;border: #9f9f9f 1px solid;border-radius: 5px;}
 
         .reply_box {
-            position: absolute;width: 350px;right: 0;
-            top: 80px;
+            position: absolute;
+            width: 350px;
+            height: 85%;
+            right: 0;
+            top: 50%;
+            transform: translate(0, -50%);
             bottom: 38px;
             background-color: #fceac2;
             border-radius: 10px 0 0 10px;
             border: solid #83686b 2px;
             border-right: 0;
-            padding-bottom: 32px;
+            z-index: 100;
         }
 
         .reply_box pre {
@@ -137,8 +141,11 @@
         }
 
         .reply_bg {
-            background-color: #d5afb6; padding: 10px 0 10px 0px;margin-top: 15px;margin-left: 4px;position: relative;width: calc(100% - 10px);
+            background-color: #d5afb6;
+            padding: 10px 0 10px 0px;
+            position: relative;width: calc(100% - 10px);
             border-radius: 7px;
+            margin-bottom: 10px;
         }
     </style>
     <script>
@@ -391,116 +398,85 @@
         </div>
     </div>
 </div>
-<div class="rant_box">
-    <div class="rant item" style="background:#E3E197;">
-        <h3 class="title">温馨提示</h3>
-        <p>10/27 22:22</p>
-        <pre class="content" tips="true">当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。</pre>
-        <label>
-            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-            外星球
-            <a href="javascript:void(0)" onclick="$(this).parent().parent().remove();">关闭</a>
-        </label>
-    </div>
-</div>
-<div class="rant reply_box" style="overflow-y: auto;">
-    <div style="position: absolute;bottom: 0;left: 0;right: 0;height: 28px;z-index: 9">
-        <span style="position: absolute;left: 2px; top: 0px;">#</span>
-        <input type="text" style="width: 90%;height: 26px;border-radius: 5px;border: #4c4c4c 2px solid;"/>
-        <button style="width: 60px;height: 26px;border-radius: 5px;border: #4c4c4c 2px solid;">回复</button>
-    </div>
-    <div class="reply_bg">
-        <span style="position: absolute;left: 2px; top: 0px;">#0</span>
-        <pre tips="true">
+<div class="rant reply_box" style="overflow: hidden;">
+    <table style="width: 100%;height: 100%;border: 1px silver solid;">
+        <tr style="height: calc(100% - 30px);">
+            <td>
+                <div style="width: calc(100% - 10px);height: 100%;overflow-y: auto;margin-top:15px;margin-left: 10px;box-sizing: border-box;border-radius: 8px;">
+                    <div class="reply_bg">
+                        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
+                        <pre tips="true">
             当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
                 当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
         </pre>
-        <label>
-            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-            <span>外星球</span>
-            <span>10/27 22:22</span>
-        </label>
-    </div>
-    <div class="reply_bg">
-        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
-        <pre tips="true">
+                        <label>
+                            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
+                            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
+                            <span>外星球</span>
+                            <span>10/27 22:22</span>
+                        </label>
+                    </div>
+                    <div class="reply_bg">
+                        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
+                        <pre tips="true">
             当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
                 当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
         </pre>
-        <label>
-            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-            <span>外星球</span>
-            <span>10/27 22:22</span>
-        </label>
-    </div>
-    <div class="reply_bg">
-        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
-        <pre tips="true">
+                        <label>
+                            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
+                            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
+                            <span>外星球</span>
+                            <span>10/27 22:22</span>
+                        </label>
+                    </div>
+                    <div class="reply_bg">
+                        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
+                        <pre tips="true">
             当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
                 当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
         </pre>
-        <label>
-            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-            <span>外星球</span>
-            <span>10/27 22:22</span>
-        </label>
-    </div>
-    <div class="reply_bg">
-        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
-        <pre tips="true">
+                        <label>
+                            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
+                            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
+                            <span>外星球</span>
+                            <span>10/27 22:22</span>
+                        </label>
+                    </div>
+                    <div class="reply_bg">
+                        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
+                        <pre tips="true">
             当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
                 当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
         </pre>
-        <label>
-            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-            <span>外星球</span>
-            <span>10/27 22:22</span>
-        </label>
-    </div>
-    <div class="reply_bg">
-        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
-        <pre tips="true">
+                        <label>
+                            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
+                            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
+                            <span>外星球</span>
+                            <span>10/27 22:22</span>
+                        </label>
+                    </div>
+                    <div class="reply_bg">
+                        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
+                        <pre tips="true">
             当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
                 当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
         </pre>
-        <label>
-            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-            <span>外星球</span>
-            <span>10/27 22:22</span>
-        </label>
-    </div>
-    <div class="reply_bg">
-        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
-        <pre tips="true">
-            当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-                当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-        </pre>
-        <label>
-            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-            <span>外星球</span>
-            <span>10/27 22:22</span>
-        </label>
-    </div>
-    <div class="reply_bg">
-        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
-        <pre tips="true">
-            当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-                当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-        </pre>
-        <label>
-            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-            <span>外星球</span>
-            <span>10/27 22:22</span>
-        </label>
-    </div>
+                        <label>
+                            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
+                            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
+                            <span>外星球</span>
+                            <span>10/27 22:22</span>
+                        </label>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr style="height: 30px;">
+            <td style="padding-left: 15px;">
+                <button>关闭</button>
+            </td>
+        </tr>
+    </table>
 </div>
 </body>
 
