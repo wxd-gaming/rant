@@ -16,8 +16,10 @@ import wxdgaming.spring.boot.rant.entity.store.RantRepository;
 import wxdgaming.spring.boot.rant.entity.store.ReplyRepository;
 import wxdgaming.spring.boot.rant.module.rant.RantService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 吐槽接口
@@ -32,18 +34,28 @@ public class ReplyController {
     final RantRepository rantRepository;
     final ReplyRepository replyRepository;
     final RantService robotService;
+    final RantController rantController;
 
-    public ReplyController(RantRepository rantRepository, RantService robotService, ReplyRepository replyRepository) {
+    public ReplyController(RantRepository rantRepository, RantService robotService, ReplyRepository replyRepository, RantController rantController) {
         this.rantRepository = rantRepository;
         this.robotService = robotService;
         this.replyRepository = replyRepository;
+        this.rantController = rantController;
     }
 
-    @RequestMapping("/list")
-    public RunResult list(@RequestParam(name = "rantId") long rantId) {
+    @RequestMapping("/get")
+    public RunResult get(@RequestParam(name = "rantId") long rantId) {
         List<ReplyInfo> allByRantId = replyRepository.findAllByRantId(rantId);
-        List<JSONObject> list = allByRantId.stream().map(this::convert).toList();
-        return RunResult.ok().data(list).fluentPut("dataSize", allByRantId.size());
+        Optional<RantInfo> byId = rantRepository.findById(rantId);
+        if (byId.isEmpty()) {
+            return RunResult.error("找不到记录");
+        }
+        List<JSONObject> list = allByRantId.stream().map(this::convert).collect(Collectors.toList());
+        Collections.reverse(list);
+        return RunResult.ok()
+                .fluentPut("rant", rantController.convert(byId.get()))
+                .fluentPut("replyList", list)
+                .fluentPut("dataSize", allByRantId.size());
     }
 
     JSONObject convert(ReplyInfo rantInfo) {
@@ -64,36 +76,41 @@ public class ReplyController {
                           @RequestParam(name = "rantId") Long rantId,
                           @RequestParam(name = "replyId", required = false, defaultValue = "0") Long replyId,
                           @RequestParam(name = "content") String content) {
-
-        content = HtmlDecoder.escapeHtml3(content);
-        if (StringsUtil.emptyOrNull(content)) {
-            return RunResult.error("内容不能空");
-        }
-        if (content.trim().length() > 1024) {
-            return RunResult.error("内容应该小于1000字");
-        }
-
-        Optional<RantInfo> byId = rantRepository.findById(rantId);
-        if (byId.isEmpty()) {
-            return RunResult.error("找不到记录");
-        }
-        if (replyId > 0) {
-            if (replyRepository.findById(replyId).isEmpty()) {
-                return RunResult.error("找不到回复记录");
+        synchronized (rantId.toString().intern()) {
+            content = HtmlDecoder.escapeHtml3(content);
+            if (StringsUtil.emptyOrNull(content)) {
+                return RunResult.error("内容不能空");
             }
+            if (content.trim().length() > 1024) {
+                return RunResult.error("内容应该小于1000字");
+            }
+
+            Optional<RantInfo> byId = rantRepository.findById(rantId);
+            if (byId.isEmpty()) {
+                return RunResult.error("找不到记录");
+            }
+            if (replyId > 0) {
+                if (replyRepository.findById(replyId).isEmpty()) {
+                    return RunResult.error("找不到回复记录");
+                }
+            }
+
+            byId.get().setReplyCount(Math.addExact(byId.get().getReplyCount(), 1));
+
+            String clientIp = SpringUtil.getClientIp();
+            ReplyInfo replyInfo = new ReplyInfo()
+                    .setRantId(rantId)
+                    .setReplyId(replyId)
+                    .setIp(clientIp)
+                    .setIpAddress("")
+                    .setContent(content.trim());
+            replyInfo.setUid(robotService.getGlobalData().replyNewId());
+            replyInfo.setCreatedTime(MyClock.millis());
+            replyRepository.save(replyInfo);
+            rantRepository.saveAndFlush(byId.get());
+            robotService.saveAndFlush();
+            return RunResult.ok().data(convert(replyInfo));
         }
-        String clientIp = SpringUtil.getClientIp();
-        ReplyInfo rantInfo = new ReplyInfo()
-                .setRantId(rantId)
-                .setReplyId(replyId)
-                .setIp(clientIp)
-                .setIpAddress("")
-                .setContent(content.trim());
-        rantInfo.setUid(robotService.getGlobalData().replyNewId());
-        rantInfo.setCreatedTime(MyClock.millis());
-        replyRepository.save(rantInfo);
-        robotService.saveAndFlush();
-        return RunResult.ok().data(convert(rantInfo));
     }
 
     @RequestMapping("/like")

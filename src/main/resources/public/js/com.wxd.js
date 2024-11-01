@@ -851,7 +851,7 @@ ${text}
                 top = e.pageY - this.tips_y - outerHeight;
             }
 
-            let bodyHeight = $("body").height() * 0.40;
+            let bodyHeight = $("body").height() * 0.55;
 
             $('.message_title_tips').css({
                 "opacity": "0.9",

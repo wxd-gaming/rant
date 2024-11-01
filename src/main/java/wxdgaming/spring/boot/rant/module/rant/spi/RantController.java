@@ -86,6 +86,7 @@ public class RantController {
         jsonObject.put("address", StringsUtil.emptyOrNull(rantInfo.getIpAddress()) ? "外星球" : rantInfo.getIpAddress());
         jsonObject.put("content", rantInfo.getContent());
         jsonObject.put("time", MyClock.formatDate("MM/dd HH:mm", rantInfo.getCreatedTime()));
+        jsonObject.put("replyCount", rantInfo.getReplyCount());
         jsonObject.put("likeCount", rantInfo.getLikeCount());
         jsonObject.put("dislikeCount", rantInfo.getDislikeCount());
         return jsonObject;

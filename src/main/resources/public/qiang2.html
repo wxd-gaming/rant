@@ -147,6 +147,14 @@
             border-radius: 7px;
             margin-bottom: 10px;
         }
+
+        .reply_box .close {
+            position: absolute;left: 0;top: 50%;transform: translate(0, -50%);width: 10px;height: 60px;
+            background-color: #0d8ddb;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+        }
+
     </style>
     <script>
 
@@ -399,8 +407,9 @@
     </div>
 </div>
 <div class="rant reply_box" style="overflow: hidden;">
+    <span class="close" onclick="$(this).parent().hide();">&nbsp;</span>
     <table style="width: 100%;height: 100%;border: 1px silver solid;">
-        <tr style="height: calc(100% - 30px);">
+        <tr style="height: calc(100% - 45px);">
             <td>
                 <div style="width: calc(100% - 10px);height: 100%;overflow-y: auto;margin-top:15px;margin-left: 10px;box-sizing: border-box;border-radius: 8px;">
                     <div class="reply_bg">
@@ -471,8 +480,8 @@
                 </div>
             </td>
         </tr>
-        <tr style="height: 30px;">
-            <td style="padding-left: 15px;">
+        <tr style="height: 45px;">
+            <td style="padding-left: 15px;vertical-align: bottom;">
                 <button>关闭</button>
             </td>
         </tr>
