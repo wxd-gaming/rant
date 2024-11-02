@@ -433,14 +433,16 @@
             wxd.netty.post("/rant/list", "sort=" + sort,
                 async (responseText) => {
                     $("#span_size").text(responseText.dataSize);
+
                     let ud = userData();
+                    let data = responseText.data.filter(item => ud.get(item.uid) !== true);
                     await wxd.delayed((index) => {
-                        const row = responseText.data[index];
+                        const row = data[index];
                         if (ud.get(row.uid) === true) {
                             return;
                         }
                         addItem(row);
-                    }, 50, responseText.data.length);
+                    }, 50, data.length);
                     // for (const row of responseText.data) {
                     //     addItem(row.uid, row.content, row.address, row.time);
                     // }
