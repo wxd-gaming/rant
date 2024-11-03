@@ -287,6 +287,7 @@
             wxd.netty.post("/reply/push", "rantId=" + rantId + "&content=" + c, (response) => {
                 if (response.code === 1) {
                     $("#txt_reply").val("");
+                    $("#span_reply_" + rantId).text("(" + response.data + ")");
                     showReplyBox(rantId);
                 } else {
                     wxd.message.notice(response.error);
@@ -458,18 +459,18 @@
 
 <body>
 <div class="file">
-    <label for="sel_flex">显示</label>
     <select id="sel_flex" onchange="changeFlex()">
         <option value="随机">随机</option>
         <option value="窗格">窗格</option>
     </select>
-    <label for="sel_sort">排序</label>
     <select id="sel_sort" onchange="changeFlex()">
-        <option value="随机">随机</option>
-        <option value="倒序">倒序</option>
-        <option value="正序">正序</option>
-        <option value="点赞">点赞</option>
-        <option value="点踩">点踩</option>
+        <option value="随机">随机排序</option>
+        <option value="发布倒序">发布倒序</option>
+        <option value="发布正序">发布正序</option>
+        <option value="最多点赞">最多点赞</option>
+        <option value="最多点踩">最多点踩</option>
+        <option value="最多评论">最多评论</option>
+        <option value="最新评论">最新评论</option>
     </select>
     <button value="发布" onclick="$('.push_bg').css({'display':'block'})">发布</button>
     <button value="发布" onclick="refresh();">刷新</button>

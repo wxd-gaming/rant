@@ -36,6 +36,8 @@ public class RantInfo extends EntityBase<Long> {
     private String content;
     @Column(columnDefinition = "int default 0 comment '评论数'")
     private int replyCount;
+    @Column(columnDefinition = "bigint default 0 comment '最后回复时间'")
+    private long lastReplyTime;
     @Column(columnDefinition = "int default 0 comment '点赞数'")
     private long likeCount;
     @Column(columnDefinition = "int default 0 comment '点踩数'")

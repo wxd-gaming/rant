@@ -1,3 +1,4 @@
+debug: false
 server:
   port: 8081   #端口号
   tomcat:
@@ -18,7 +19,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   profiles:
-    active: mysql-dev
+    active: mysql
   web:
     resources:
       add-mappings: true

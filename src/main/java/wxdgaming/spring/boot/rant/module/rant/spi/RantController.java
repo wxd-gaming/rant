@@ -39,23 +39,21 @@ public class RantController {
     public RunResult list(@RequestParam(name = "sort", required = false, defaultValue = "随机") String sort) {
         sort = HtmlDecoder.escapeHtml3(sort);
         List<RantInfo> all = rantRepository.findAll();
-        if ("随机".equals(sort)) {
-            Collections.shuffle(all);
-        } else if ("倒序".equals(sort)) {
+        if ("发布倒序".equals(sort)) {
             all.sort((o1, o2) -> {
                 if (!o2.getCreatedTime().equals(o1.getCreatedTime())) {
                     return Long.compare(o2.getCreatedTime(), o1.getCreatedTime());
                 }
                 return Long.compare(o2.getUid(), o1.getUid());
             });
-        } else if ("正序".equals(sort)) {
+        } else if ("发布正序".equals(sort)) {
             all.sort((o1, o2) -> {
                 if (!o1.getCreatedTime().equals(o2.getCreatedTime())) {
                     return Long.compare(o1.getCreatedTime(), o2.getCreatedTime());
                 }
                 return Long.compare(o1.getUid(), o2.getUid());
             });
-        } else if ("点赞".equals(sort)) {
+        } else if ("最多点赞".equals(sort)) {
             all.sort((o1, o2) -> {
                 if (o2.getLikeCount() != o1.getLikeCount()) {
                     return Long.compare(o2.getLikeCount(), o1.getLikeCount());
@@ -65,7 +63,7 @@ public class RantController {
                 }
                 return Long.compare(o2.getUid(), o1.getUid());
             });
-        } else if ("点踩".equals(sort)) {
+        } else if ("最多点踩".equals(sort)) {
             all.sort((o1, o2) -> {
                 if (o2.getDislikeCount() != o1.getDislikeCount()) {
                     return Long.compare(o2.getDislikeCount(), o1.getDislikeCount());
@@ -75,6 +73,28 @@ public class RantController {
                 }
                 return Long.compare(o2.getUid(), o1.getUid());
             });
+        } else if ("最多评论".equals(sort)) {
+            all.sort((o1, o2) -> {
+                if (o2.getReplyCount() != o1.getReplyCount()) {
+                    return Long.compare(o2.getReplyCount(), o1.getReplyCount());
+                }
+                if (!o2.getCreatedTime().equals(o1.getCreatedTime())) {
+                    return Long.compare(o2.getCreatedTime(), o1.getCreatedTime());
+                }
+                return Long.compare(o2.getUid(), o1.getUid());
+            });
+        } else if ("最新评论".equals(sort)) {
+            all.sort((o1, o2) -> {
+                if (o2.getLastReplyTime() != o1.getLastReplyTime()) {
+                    return Long.compare(o2.getLastReplyTime(), o1.getLastReplyTime());
+                }
+                if (!o2.getCreatedTime().equals(o1.getCreatedTime())) {
+                    return Long.compare(o2.getCreatedTime(), o1.getCreatedTime());
+                }
+                return Long.compare(o2.getUid(), o1.getUid());
+            });
+        } else {
+            Collections.shuffle(all);
         }
         List<JSONObject> list = all.stream().map(this::convert).limit(300).toList();
         return RunResult.ok().data(list).fluentPut("dataSize", all.size());
@@ -85,7 +105,7 @@ public class RantController {
         jsonObject.put("uid", rantInfo.getUid());
         jsonObject.put("address", StringsUtil.emptyOrNull(rantInfo.getIpAddress()) ? "外星球" : rantInfo.getIpAddress());
         jsonObject.put("content", rantInfo.getContent());
-        jsonObject.put("time", MyClock.formatDate("MM/dd HH:mm", rantInfo.getCreatedTime()));
+        jsonObject.put("time", MyClock.formatDate("MM/dd HH:mm:ss", rantInfo.getCreatedTime()));
         jsonObject.put("replyCount", rantInfo.getReplyCount());
         jsonObject.put("likeCount", rantInfo.getLikeCount());
         jsonObject.put("dislikeCount", rantInfo.getDislikeCount());

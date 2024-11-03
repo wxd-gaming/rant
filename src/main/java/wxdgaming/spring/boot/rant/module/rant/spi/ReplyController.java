@@ -65,7 +65,7 @@ public class ReplyController {
         jsonObject.put("replyId", rantInfo.getReplyId());
         jsonObject.put("address", StringsUtil.emptyOrNull(rantInfo.getIpAddress()) ? "外星球" : rantInfo.getIpAddress());
         jsonObject.put("content", rantInfo.getContent());
-        jsonObject.put("time", MyClock.formatDate("MM/dd HH:mm", rantInfo.getCreatedTime()));
+        jsonObject.put("time", MyClock.formatDate("MM/dd HH:mm:ss", rantInfo.getCreatedTime()));
         jsonObject.put("likeCount", rantInfo.getLikeCount());
         jsonObject.put("dislikeCount", rantInfo.getDislikeCount());
         return jsonObject;
@@ -96,6 +96,7 @@ public class ReplyController {
             }
 
             byId.get().setReplyCount(Math.addExact(byId.get().getReplyCount(), 1));
+            byId.get().setLastReplyTime(MyClock.millis());
 
             String clientIp = SpringUtil.getClientIp();
             ReplyInfo replyInfo = new ReplyInfo()
@@ -109,7 +110,7 @@ public class ReplyController {
             replyRepository.save(replyInfo);
             rantRepository.saveAndFlush(byId.get());
             robotService.saveAndFlush();
-            return RunResult.ok().data(convert(replyInfo));
+            return RunResult.ok().data(byId.get().getReplyCount());
         }
     }
 
