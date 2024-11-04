@@ -357,7 +357,7 @@
                 box_flex = `position: absolute;left: ${bgLeft}px;top: ${bgTop}px;`
             }
             let box = `
-<div id="box_${row.uid}" class="rant item" style="background:#${bgColor};${box_flex}">
+<div id="box_${row.uid}" class="rant item" style="background:#${bgColor};${box_flex};display: none;">
     <h3 class="title">匿名</h3>
     <p>${row.address}&nbsp;&nbsp;${row.time}</p>
     <pre class="content" tips="true">${row.content}</pre>
@@ -371,6 +371,7 @@
             `;
 
             $rantBox.append(box);
+            $("#box_" + row.uid).fadeIn(800);
         }
 
         function actionBox() {
@@ -410,7 +411,10 @@
             var map = userData();
             map.put(uid, true);
             localStorage.setItem("user-data", map.toJson());
-            $(item).parent().parent().remove();
+            $(item).parent().parent().fadeOut(650);
+            setTimeout(() => {
+                $(item).parent().parent().remove();
+            }, 800);
         }
 
         function refresh() {
@@ -465,8 +469,8 @@
     </select>
     <select id="sel_sort" onchange="changeFlex()">
         <option value="随机">随机排序</option>
-        <option value="发布倒序">发布倒序</option>
-        <option value="发布正序">发布正序</option>
+        <option value="发布倒序">最新发布</option>
+        <option value="发布正序">最早发布</option>
         <option value="最多点赞">最多点赞</option>
         <option value="最多点踩">最多点踩</option>
         <option value="最多评论">最多评论</option>
