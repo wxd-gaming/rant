@@ -12,17 +12,17 @@
     <link rel="stylesheet" type="text/css" href="/style/com.wxd.css"/>
 
     <style>
+        * {box-sizing: border-box;margin: 0;padding: 0;}
 
         html, body {width: 100%; height: 100%;
             overflow: hidden;
             background-image: linear-gradient(#B6E8DB, #15B0C9);
         }
 
-
         .item {
             display: inline-block;
             position: relative;
-            width: 260px;
+            width: 290px;
             height: 170px;
             box-shadow: 0 2px 10px 1px #7F7F7F;
             border-bottom-left-radius: 20px 500px;
@@ -34,9 +34,9 @@
             -webkit-user-select: none; /* webkit浏览器 */ -moz-user-select: none; /* Firefox */ -ms-user-select: none; /* IE10+ */ user-select: none; /* 标准语法 */
         }
 
-        .item .title {display: inline-block;padding-left: 15px; padding-bottom: 5px;}
+        .item .title {display: inline-block;padding-left: 15px;}
 
-        .item p {display: inline-block;padding-left: 15px; padding-bottom: 5px;color: white;}
+        .item p {display: inline-block;padding-left: 15px; padding-bottom: 5px;color: black;}
 
         .item .content {
             display: block;
@@ -50,7 +50,9 @@
             bottom: 35px;
             text-wrap: auto;
             word-break: break-all;
-            white-space: pre-wrap;
+            white-space: pre-wrap !important;
+            word-wrap: break-word !important;
+            *white-space: normal !important;
             letter-spacing: 2px; /* 增加字符间距 */
             /*color: white; !* 文字颜色 *!*/
             /*text-shadow: 5px 3px 5px black; !* 阴影效果 *!*/
@@ -66,9 +68,9 @@
             font-size: 14px;
         }
 
-        .rant label a:link, .rant label a:visited {color: #720000;}
+        .rant label a:link, .rant label a:visited {color: #aa0202;}
 
-        .rant label a {margin-right: 5px;margin-left: 5px;color: #720000; }
+        .rant label a {margin-right: 5px;margin-left: 5px;color: #aa0202; }
 
         .rant label * {vertical-align: middle;}
 
@@ -113,18 +115,29 @@
             z-index: 100;
         }
 
-        .reply_box pre {
-            /*display: block;*/
-            overflow-y: auto;
+        .reply_bg {
+            display: block;
+            background-color: #d5afb6;
+            padding: 20px 10px 10px 10px;
+            position: relative;
+            width: calc(350px - 25px);
+            border-radius: 7px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .reply_bg pre {
+            overflow: auto;
             /*border: #1c1c1c 1px solid;*/
             background-color: white;
             box-sizing: border-box;
-            margin: 8px 5px -10px 2px;
             border-radius: 8px;
-            text-wrap: auto;
             word-break: break-all;
-            white-space: pre-wrap;
+            white-space: pre-wrap !important;
+            word-wrap: break-word !important;
+            *white-space: normal !important;
             padding: 5px;
+            max-height: 160px;
             letter-spacing: 2px; /* 增加字符间距 */
             /*color: white; !* 文字颜色 *!*/
             /*text-shadow: 5px 3px 5px black; !* 阴影效果 *!*/
@@ -140,13 +153,6 @@
             margin-left: 5px;
         }
 
-        .reply_bg {
-            background-color: #d5afb6;
-            padding: 10px 0 10px 0px;
-            position: relative;width: calc(100% - 10px);
-            border-radius: 7px;
-            margin-bottom: 10px;
-        }
 
         .reply_box .close {
             position: absolute;left: 0;top: 50%;transform: translate(0, -50%);width: 10px;height: 60px;
@@ -154,7 +160,6 @@
             border-radius: 0 8px 8px 0;
             cursor: pointer;
         }
-
     </style>
     <script>
 
@@ -237,10 +242,69 @@
             });
         }
 
+        let rantId = 0;
+
+        function showReplyBox(uid) {
+            rantId = uid;
+            wxd.netty.post("/reply/get", "rantId=" + uid, (response) => {
+                if (response.code === 1) {
+                    let rantInfo = response.rant;
+                    let rantHtml = `
+                    <div class="reply_bg">
+                        <span style="position: absolute;left: 2px; top: 0px;">#0</span>
+                        <pre tips="true">${rantInfo.content}</pre>
+                        <label>
+        <a href="javascript:void(0)" onclick="like(this,${rantInfo.uid})"><img src="img/like.png" alt="赞"/></a><span id="span_reply_like_${rantInfo.uid}">(${rantInfo.likeCount})</span>
+        <a href="javascript:void(0)" onclick="dislike(this,${rantInfo.uid})"><img src="img/dislike.png" alt="赞"/></a><span id="span_reply_dislike_${rantInfo.uid}">(${rantInfo.dislikeCount})</span>
+        <span>${rantInfo.address}&nbsp;&nbsp;${rantInfo.time}</span>
+                        </label>
+                    </div>
+                    `;
+                    $(".rant_reply_content").html("");
+                    $(".rant_reply_content").append(rantHtml);
+                    let index = response.replyList.length;
+                    response.replyList.forEach(function (item) {
+                        let rantReplyHtml = `
+                    <div class="reply_bg">
+                        <span style="position: absolute;left: 2px; top: 0px;">#${index}</span>
+                        <pre tips="true">${item.content}</pre>
+                        <label>
+        <a href="javascript:void(0)" onclick="replyLike(this,${item.uid})"><img src="img/like.png" alt="赞"/></a><span id="rant_reply_like_${item.uid}">(${item.likeCount})</span>
+        <a href="javascript:void(0)" onclick="replyDislike(this,${item.uid})"><img src="img/dislike.png" alt="赞"/></a><span id="rant_reply_dislike_${item.uid}">(${item.dislikeCount})</span>
+        <span>${item.address}&nbsp;&nbsp;${item.time}</span>
+                        </label>
+                    </div>
+                    `;
+                        index--;
+                        $(".rant_reply_content").append(rantReplyHtml);
+                    });
+
+                    $(".reply_box").show("slow");
+                } else {
+                    wxd.message.notice(response.error);
+                }
+            });
+        }
+
+        function reply() {
+            let c = $("#txt_reply").val();
+
+            wxd.netty.post("/reply/push", "rantId=" + rantId + "&content=" + c, (response) => {
+                if (response.code === 1) {
+                    $("#txt_reply").val("");
+                    $("#span_reply_" + rantId).text("(" + response.data + ")");
+                    showReplyBox(rantId);
+                } else {
+                    wxd.message.notice(response.error);
+                }
+            });
+        }
+
         function like(element, uid) {
             wxd.netty.post("/rant/like", "uid=" + uid, (response) => {
                 if (response.code === 1) {
                     $("#span_like_" + uid).text("(" + response.data + ")");
+                    $("#span_reply_like_" + uid).text("(" + response.data + ")");
                 } else {
                     wxd.message.notice(response.error);
                 }
@@ -251,6 +315,28 @@
             wxd.netty.post("/rant/dislike", "uid=" + uid, (response) => {
                 if (response.code === 1) {
                     $("#span_dislike_" + uid).text("(" + response.data + ")");
+                    $("#span_reply_dislike_" + uid).text("(" + response.data + ")");
+                } else {
+                    wxd.message.notice(response.error);
+                }
+            });
+        }
+
+
+        function replyLike(element, uid) {
+            wxd.netty.post("/reply/like", "uid=" + uid, (response) => {
+                if (response.code === 1) {
+                    $("#rant_reply_like_" + uid).text("(" + response.data + ")");
+                } else {
+                    wxd.message.notice(response.error);
+                }
+            });
+        }
+
+        function replyDislike(element, uid) {
+            wxd.netty.post("/reply/dislike", "uid=" + uid, (response) => {
+                if (response.code === 1) {
+                    $("#rant_reply_dislike_" + uid).text("(" + response.data + ")");
                 } else {
                     wxd.message.notice(response.error);
                 }
@@ -276,20 +362,21 @@
                 box_flex = `position: absolute;left: ${bgLeft}px;top: ${bgTop}px;`
             }
             let box = `
-<div id="box_${row.uid}" class="rant item" style="background:#${bgColor};${box_flex}">
+<div id="box_${row.uid}" class="rant item" style="background:#${bgColor};${box_flex};display: none;">
     <h3 class="title">匿名</h3>
-    <p>${row.time}</p>
+    <p>${row.address}&nbsp;&nbsp;${row.time}</p>
     <pre class="content" tips="true">${row.content}</pre>
     <label>
         <a href="javascript:void(0)" onclick="like(this,${row.uid})"><img src="img/like.png" alt="赞"/></a><span id="span_like_${row.uid}">(${row.likeCount})</span>
         <a href="javascript:void(0)" onclick="dislike(this,${row.uid})"><img src="img/dislike.png" alt="赞"/></a><span id="span_dislike_${row.uid}">(${row.dislikeCount})</span>
-        ${row.address}
-        <a href="javascript:void(0)" onclick="closeBox(this,${row.uid})">关闭</a>
+        <a href="javascript:void(0)" onclick="showReplyBox(${row.uid})">评论</a><span id="span_reply_${row.uid}">(${row.replyCount})</span>
+        <a href="javascript:void(0)" onclick="closeBox(this,${row.uid})">屏蔽</a>
     </label>
 </div>
             `;
 
             $rantBox.append(box);
+            $("#box_" + row.uid).fadeIn(800);
         }
 
         function actionBox() {
@@ -329,7 +416,10 @@
             var map = userData();
             map.put(uid, true);
             localStorage.setItem("user-data", map.toJson());
-            $(item).parent().parent().remove();
+            $(item).parent().parent().fadeOut(650);
+            setTimeout(() => {
+                $(item).parent().parent().remove();
+            }, 800);
         }
 
         function refresh() {
@@ -353,14 +443,16 @@
             wxd.netty.post("/rant/list", "sort=" + sort,
                 async (responseText) => {
                     $("#span_size").text(responseText.dataSize);
+
                     let ud = userData();
+                    let data = responseText.data.filter(item => ud.get(item.uid) !== true);
                     await wxd.delayed((index) => {
-                        const row = responseText.data[index];
+                        const row = data[index];
                         if (ud.get(row.uid) === true) {
                             return;
                         }
                         addItem(row);
-                    }, 50, responseText.data.length);
+                    }, 50, data.length);
                     // for (const row of responseText.data) {
                     //     addItem(row.uid, row.content, row.address, row.time);
                     // }
@@ -376,18 +468,18 @@
 
 <body>
 <div class="file">
-    <label for="sel_flex">显示</label>
     <select id="sel_flex" onchange="changeFlex()">
         <option value="随机">随机</option>
         <option value="窗格">窗格</option>
     </select>
-    <label for="sel_sort">排序</label>
     <select id="sel_sort" onchange="changeFlex()">
-        <option value="随机">随机</option>
-        <option value="倒序">倒序</option>
-        <option value="正序">正序</option>
-        <option value="点赞">点赞</option>
-        <option value="点踩">点踩</option>
+        <option value="随机">随机排序</option>
+        <option value="发布倒序">最新发布</option>
+        <option value="发布正序">最早发布</option>
+        <option value="最多点赞">最多点赞</option>
+        <option value="最多点踩">最多点踩</option>
+        <option value="最多评论">最多评论</option>
+        <option value="最新评论">最新评论</option>
     </select>
     <button value="发布" onclick="$('.push_bg').css({'display':'block'})">发布</button>
     <button value="发布" onclick="refresh();">刷新</button>
@@ -406,69 +498,30 @@
         </div>
     </div>
 </div>
-<div class="rant reply_box" style="overflow: hidden;">
-    <span class="close" onclick="$(this).parent().hide();">&nbsp;</span>
+<div class="rant_box">
+    <div class="rant item" style="background:#E3E197;">
+        <h3 class="title">温馨提示</h3>
+        <p>北京市.北京 10/27 22:22 </p>
+        <pre class="content" tips="true">当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。</pre>
+        <label>
+            <a href="javascript:void(0)" onclick="wxd.message.notice('我是系统框')"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
+            <a href="javascript:void(0)" onclick="wxd.message.notice('我是系统框')"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
+            <a href="javascript:void(0)" onclick="">评论</a><span>(11)</span>
+            <a href="javascript:void(0)" onclick="$(this).parent().parent().remove();">屏蔽</a>
+        </label>
+    </div>
+</div>
+<div class="rant reply_box" style="overflow: hidden;display: block;">
+    <span class="close" onclick="$(this).parent().hide('slow');">&nbsp;</span>
     <table style="width: 100%;height: 100%;border: 1px silver solid;">
         <tr style="height: calc(100% - 45px);">
             <td>
-                <div style="width: calc(100% - 10px);height: 100%;overflow-y: auto;margin-top:15px;margin-left: 10px;box-sizing: border-box;border-radius: 8px;">
+                <div class="rant_reply_content" style="width: calc(100% - 10px);height: 100%;overflow-y: auto;margin-top:15px;margin-left: 10px;box-sizing: border-box;border-radius: 8px;">
                     <div class="reply_bg">
-                        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
+                        <span style="position: absolute;left: 2px; top: 0px;">#0</span>
                         <pre tips="true">
             当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-                当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-        </pre>
-                        <label>
-                            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-                            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-                            <span>外星球</span>
-                            <span>10/27 22:22</span>
-                        </label>
-                    </div>
-                    <div class="reply_bg">
-                        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
-                        <pre tips="true">
-            当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-                当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-        </pre>
-                        <label>
-                            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-                            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-                            <span>外星球</span>
-                            <span>10/27 22:22</span>
-                        </label>
-                    </div>
-                    <div class="reply_bg">
-                        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
-                        <pre tips="true">
-            当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-                当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-        </pre>
-                        <label>
-                            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-                            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-                            <span>外星球</span>
-                            <span>10/27 22:22</span>
-                        </label>
-                    </div>
-                    <div class="reply_bg">
-                        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
-                        <pre tips="true">
-            当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-                当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-        </pre>
-                        <label>
-                            <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-                            <a href="javascript:void(0)"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-                            <span>外星球</span>
-                            <span>10/27 22:22</span>
-                        </label>
-                    </div>
-                    <div class="reply_bg">
-                        <span style="position: absolute;left: 2px; top: 0px;">#1</span>
-                        <pre tips="true">
-            当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
-                当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。
+                当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。
         </pre>
                         <label>
                             <a href="javascript:void(0)"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
@@ -481,8 +534,9 @@
             </td>
         </tr>
         <tr style="height: 45px;">
-            <td style="padding-left: 15px;vertical-align: bottom;">
-                <button>关闭</button>
+            <td style="padding-left: 2px;padding-bottom: 2px; ;vertical-align: bottom;">
+                <input id="txt_reply" type="text" placeholder="请输入评论内容" style="width: calc(100% - 40px);height: 28px;border-radius: 5px;border: #4c4c4c 2px solid;padding-left: 2px;"/>
+                <button onclick="reply()">发送</button>
             </td>
         </tr>
     </table>

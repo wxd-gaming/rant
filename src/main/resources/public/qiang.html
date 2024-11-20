@@ -50,7 +50,9 @@
             bottom: 35px;
             text-wrap: auto;
             word-break: break-all;
-            white-space: pre-wrap;
+            white-space: pre-wrap !important;
+            word-wrap: break-word !important;
+            *white-space: normal !important;
             letter-spacing: 2px; /* 增加字符间距 */
             /*color: white; !* 文字颜色 *!*/
             /*text-shadow: 5px 3px 5px black; !* 阴影效果 *!*/
@@ -84,7 +86,7 @@
         }
 
         .push_box {
-            width: 35%;min-width: 300px;height: 430px;
+            width: 35%;min-width: 300px;height: 400px;
             position: absolute;
             left: 50%;top: 50%;
             transform: translate(-50%, -50%);
@@ -113,17 +115,29 @@
             z-index: 100;
         }
 
-        .reply_box pre {
+        .reply_bg {
+            display: block;
+            background-color: #d5afb6;
+            padding: 20px 10px 10px 10px;
+            position: relative;
+            width: calc(350px - 25px);
+            border-radius: 7px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .reply_bg pre {
             /*display: block;*/
             overflow-y: auto;
             /*border: #1c1c1c 1px solid;*/
             background-color: white;
             box-sizing: border-box;
-            margin: 8px 5px -10px 2px;
             border-radius: 8px;
             text-wrap: auto;
             word-break: break-all;
-            white-space: pre-wrap;
+            white-space: pre-wrap !important;
+            word-wrap: break-word !important;
+            *white-space: normal !important;
             padding: 5px;
             max-height: 160px;
             letter-spacing: 2px; /* 增加字符间距 */
@@ -139,14 +153,6 @@
             font-size: 14px;
             margin-top: 15px;
             margin-left: 5px;
-        }
-
-        .reply_bg {
-            background-color: #d5afb6;
-            padding: 10px 0 10px 0px;
-            position: relative;width: calc(100% - 10px);
-            border-radius: 7px;
-            margin-bottom: 10px;
         }
 
         .reply_box .close {
@@ -222,9 +228,18 @@
 
         function push() {
             let c = $("#push_context").val();
-            wxd.netty.post("/rant/push", "content=" + c, (response) => {
+
+            let push_name = $("#push_name").val();
+
+            if (wxd.isNull(push_name)) {
+                push_name = "匿名";
+            }
+
+            localStorage.setItem("push_name", push_name);
+
+            wxd.netty.post("/rant/push", "pushName=" + push_name + "&content=" + c, (response) => {
                 if (response.code === 1) {
-                    var row = response.data;
+                    let row = response.data;
                     addItem(row);
 
                     $("#push_context").val("");
@@ -358,7 +373,7 @@
             }
             let box = `
 <div id="box_${row.uid}" class="rant item" style="background:#${bgColor};${box_flex};display: none;">
-    <h3 class="title">匿名</h3>
+    <h3 class="title">${row.nickName}</h3>
     <p>${row.address}&nbsp;&nbsp;${row.time}</p>
     <pre class="content" tips="true">${row.content}</pre>
     <label>
@@ -435,6 +450,14 @@
             if (wxd.notNull(sort)) {
                 $("#sel_sort").val(sort);
             }
+
+            var push_name = localStorage.getItem("push_name");
+            if (wxd.notNull(push_name)) {
+                $("#push_name").val(push_name);
+            } else {
+                $("#push_name").val("匿名");
+            }
+
             wxd.netty.post("/rant/list", "sort=" + sort,
                 async (responseText) => {
                     $("#span_size").text(responseText.dataSize);
@@ -485,7 +508,8 @@
 <div class="push_bg" style="display: none; position: absolute;background: rgba(69, 68, 68, 0.2); width: 100%;height: 100%;left: 0;top: 0; z-index: 999999;">
     <div class="push_box">
         <div style="position:absolute ;left:10px;right:10px;box-sizing: border-box;">
-            <textarea id="push_context" style="width: 100%;min-width: 280px;height: 360px;border-radius: 5px; border: #4c4c4c 2px solid;display: block;"></textarea>
+            <input id="push_name" type="text" placeholder="匿名" style="width: calc(100%);min-width: 280px;height: 28px;border-radius: 5px; border: #4c4c4c 2px solid;display: block;margin-bottom: 5px;padding-left: 10px;">
+            <textarea id="push_context" style="width: 100%;min-width: 280px;height: 300px;border-radius: 5px; border: #4c4c4c 2px solid;display: block;"></textarea>
             <br>
             <button onclick="push()">发布</button>
             &nbsp;&nbsp;&nbsp;&nbsp;
