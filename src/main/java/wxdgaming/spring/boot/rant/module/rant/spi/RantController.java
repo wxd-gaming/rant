@@ -1,7 +1,8 @@
 package wxdgaming.spring.boot.rant.module.rant.spi;
 
-import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -103,6 +104,7 @@ public class RantController {
     JSONObject convert(RantInfo rantInfo) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("uid", rantInfo.getUid());
+        jsonObject.put("nickName", StringUtils.isBlank(rantInfo.getNickName()) ? "匿名" : rantInfo.getNickName());
         jsonObject.put("address", StringsUtil.emptyOrNull(rantInfo.getIpAddress()) ? "外星球" : rantInfo.getIpAddress());
         jsonObject.put("content", rantInfo.getContent());
         jsonObject.put("time", MyClock.formatDate("MM/dd HH:mm:ss", rantInfo.getCreatedTime()));
@@ -113,8 +115,17 @@ public class RantController {
     }
 
     @RequestMapping("/push")
-    public RunResult push(HttpServletRequest request, @RequestParam String content) {
+    public RunResult push(HttpServletRequest request,
+                          @RequestParam(name = "pushName") String pushName,
+                          @RequestParam(name = "content") String content) {
+        pushName = HtmlDecoder.escapeHtml3(pushName);
         content = HtmlDecoder.escapeHtml3(content);
+        if (pushName.length() > 18) {
+            return RunResult.error("昵称太长了");
+        }
+        if (StringUtils.isBlank(pushName)) {
+            pushName = "匿名";
+        }
         if (StringsUtil.emptyOrNull(content)) {
             return RunResult.error("内容不能空");
         }
@@ -125,6 +136,7 @@ public class RantController {
         RantInfo rantInfo = new RantInfo()
                 .setIp(clientIp)
                 .setIpAddress("")
+                .setNickName(pushName)
                 .setContent(content.trim());
         rantInfo.setUid(robotService.getGlobalData().rantNewId());
         rantInfo.setCreatedTime(MyClock.millis());

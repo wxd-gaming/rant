@@ -32,6 +32,7 @@ public class RantInfo extends EntityBase<Long> {
     private String ipAddress;
     private int accountId;
     private boolean showNick = false;
+    private String nickName;
     @Column(columnDefinition = "varchar(1024) comment '吐槽内容，不得超过1000个字'")
     private String content;
     @Column(columnDefinition = "int default 0 comment '评论数'")
