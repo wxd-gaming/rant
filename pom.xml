@@ -91,6 +91,11 @@
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.net</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
             <artifactId>wxdgaming.spring.boot.web</artifactId>
             <version>1.0.1</version>
         </dependency>

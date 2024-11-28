@@ -19,7 +19,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   profiles:
-    active: mysql
+    active: mysql,socket
   web:
     resources:
       add-mappings: true

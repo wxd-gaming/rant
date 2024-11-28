@@ -361,6 +361,7 @@ const wxd = {
             close() {
                 if (this.socket != null) {
                     this.socket.close();
+                    this.socketOpen = false;
                     this.socket = null;
                 }
             }
@@ -392,6 +393,7 @@ const wxd = {
                     };
 
                     this.socket.onclose = (event) => {
+                        console.error("链接异常");
                         if (this.socketOpen) {
                             wxd.message.notice("web socket 链接关闭", true, 3000);
                         } else {

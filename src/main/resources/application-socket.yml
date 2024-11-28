@@ -1,0 +1,14 @@
+socket:
+  debugLogger: false
+  printLogger: true
+  server:
+    bossThreadSize: 2 #线程池的线程数量，共享
+    workerThreadSize: 10 #线程池的线程数量，共享
+    config:
+      port: 18001
+      idleTimeout: 30 # 单位秒
+      enable-web-socket: true
+      web-socket-prefix: "/wxd-chat"
+      sslProtocolType: TLSV12 # TLSV12  TLSV1 SSLV3 SSL
+      jks_path: "jks/wxdtest-1.8.jks"
+      jks_pwd_path: "jks/wxdtest-1.8.jks.pwd"

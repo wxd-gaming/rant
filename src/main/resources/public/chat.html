@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>聊天室</title>
+    <script charset="utf-8" type="text/javascript" src="/jquery/2.1.4/jquery.min.js"></script>
+    <script charset="utf-8" type="text/javascript" src="/jquery-ui/1.13.1/jquery-ui.js"></script>
+    <script charset="utf-8" type="text/javascript" src="/js/com.wxd.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/style/com.wxd.css"/>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {overflow: hidden;width: 100%;height: 100%;}
+    </style>
+    <script>
+        var pingMessage = new wxd.Map().put("cmd", "ping").toJson();
+        var wsClient = new wxd.netty.WSClient();
+        let ws_url = "";
+        let loginEnd = false;
+
+        $(() => {
+            if (window.location.protocol.toLowerCase() === "https:") {
+                ws_url = "wss";
+            } else {
+                ws_url = "ws";
+            }
+            var host = window.location.host;
+            if (host.indexOf(":") > 0) {
+                host = host.substring(0, host.indexOf(":"));
+            }
+            ws_url = ws_url + "://" + host + ":18001/wxd-chat";
+            console.log("ws_url=" + ws_url);
+            wsClient.onRead = (data) => {
+                var msg = JSON.parse(data);
+                if (msg.cmd === "ping") {
+
+                } else if (msg.cmd === "login") {
+                    wxd.message.notice("欢迎 " + msg.nick + " 进入聊天室");
+                } else {
+                    let content = `
+                    <div>
+                        <p>${msg.nick} ${msg.time} ${msg.address}</p>
+                        <p>${msg.content}</p>
+                    </div>
+                `;
+                    $("#chat-content").append(content);
+                }
+            };
+            wsClient.connect(ws_url);
+
+            setInterval(function () {
+                if (wsClient.socketOpen) {
+                    if (!loginEnd) {
+                        wsClient.sendMsg(new wxd.Map().put("cmd", "login").put("nick", "小不点").toJson());
+                        loginEnd = true;
+                    }
+                    wsClient.sendMsg(new wxd.Map().put("cmd", "chat").put("content", "小不点").toJson());
+                    wsClient.sendMsg(pingMessage);
+                }
+            }, 2000);
+        });
+    </script>
+</head>
+<body>
+<div>
+    <div id="chat-title" style="width: 160px;position: absolute;left: 0;top:0;bottom: 0;">
+        公共聊天室
+    </div>
+    <div id="chat-content" style="position: absolute;left: 161px;top:0;right: 0; bottom: 120px;">
+        <div>
+            <p>無心道 2024-11-27 20:20:20 浙江.杭州</p>
+            <p>ccccccc</p>
+        </div>
+    </div>
+    <div style="position: absolute;left: 161px;right: 0; bottom: 0;height: 120px;">
+        <input type="text" id="chat-input"/>
+        <button id="chat-send">发送</button>
+    </div>
+</div>
+</body>
+</html>

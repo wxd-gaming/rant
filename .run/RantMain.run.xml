@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="RantMain" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-    <option name="ACTIVE_PROFILES" value="mysql,dev" />
+    <option name="ACTIVE_PROFILES" value="mysql,dev,socket" />
     <module name="rant" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="wxdgaming.spring.boot.rant.RantMain" />
     <extension name="coverage">
