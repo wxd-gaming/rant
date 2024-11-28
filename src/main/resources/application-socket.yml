@@ -10,5 +10,4 @@ socket:
       enable-web-socket: true
       web-socket-prefix: "/wxd-chat"
       sslProtocolType: TLSV12 # TLSV12  TLSV1 SSLV3 SSL
-      jks_path: "jks/wxdtest-1.8.jks"
-      jks_pwd_path: "jks/wxdtest-1.8.jks.pwd"
+      max-frame-length: 15 #每秒钟最大消息数量

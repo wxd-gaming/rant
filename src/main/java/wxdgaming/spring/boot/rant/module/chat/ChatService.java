@@ -74,6 +74,7 @@ public class ChatService implements SessionHandler {
                     }
                 });
                 runResult.put("nick", nick);
+                socketService.writeAndFlush(RunResult.ok().fluentPut("cmd", "logined").toJSONString());
             }
             break;
         }
