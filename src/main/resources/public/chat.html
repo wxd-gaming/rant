@@ -100,6 +100,9 @@
         });
 
         function addChatContent(msg) {
+            if (msg.cmd === "chat-img") {
+                msg.content = `<object data="${msg.content}" style="max-width: 90%;max-height: 280px;"></object>`;
+            }
             let content = `
                     <div class="chat-content">
                         <p>${msg.nick} ${msg.time} ${msg.address}</p>
@@ -111,8 +114,17 @@
         }
 
         function login() {
-            localStorage.setItem("chat-nick-name", $("#nick-input").val());
-            wsClient.sendMsg(new wxd.Map().put("cmd", "login").put("nick", $("#nick-input").val()).toJson());
+            var value = $("#nick-input").val();
+            if (wxd.isNull(value)) {
+                wxd.message.notice("昵称不能为空");
+                return;
+            }
+            if (value.length > 18) {
+                wxd.message.notice("昵称不能超过18个字符");
+                return;
+            }
+            localStorage.setItem("chat-nick-name", value);
+            wsClient.sendMsg(new wxd.Map().put("cmd", "login").put("nick", value).toJson());
         }
 
         function sendChat() {
@@ -124,7 +136,25 @@
                 wxd.message.notice("未登录");
                 return;
             }
-            wsClient.sendMsg(new wxd.Map().put("cmd", "chat").put("content", $("#chat-input").val()).toJson());
+            var content = $("#chat-input").val();
+            if (wxd.isNull(content)) {
+                return;
+            }
+            if (content.length > 398) {
+                wxd.message.notice("内容太多");
+                return;
+            }
+            wsClient.sendMsg(new wxd.Map().put("cmd", "chat").put("content", content).toJson());
+        }
+
+        function sendImg() {
+            wxd.netty.upload("/chat/upload", null, function (data) {
+                if (data.code !== 1) {
+                    wxd.message.notice(data.error);
+                    return;
+                }
+                wsClient.sendMsg(new wxd.Map().put("cmd", "chat-img").put("content", data.data).toJson());
+            });
         }
     </script>
 </head>
@@ -142,9 +172,12 @@
         </div>
     </div>
     <div style="position: absolute;left: 161px;right: 0; bottom: 0;height: 120px;align-items: center;justify-content: center;display: flex;">
-        <textarea id="chat-input" style="width: calc(100% - 80px);height: calc(100% - 15px);"></textarea>
-        <button id="chat-send" style="height: calc(100% - 15px);width: 30px;margin-left: 5px;" onclick="sendChat()">
+        <textarea id="chat-input" style="width: calc(100% - 150px);height: calc(100% - 15px);"></textarea>
+        <button id="chat-send" style="height: calc(100% - 15px);width: 50px;margin-left: 5px;" onclick="sendChat()">
             发送
+        </button>
+        <button id="chat-img-send" style="height: calc(100% - 15px);width: 50px;margin-left: 5px;" onclick="sendImg()">
+            文件
         </button>
     </div>
 </div>

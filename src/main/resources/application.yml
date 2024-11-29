@@ -23,7 +23,7 @@ spring:
   web:
     resources:
       add-mappings: true
-      static-locations: classpath:/public/
+      static-locations: classpath:/public/,file:upload/
       chain:
         compressed: true    #开启压缩
         enabled: true       #开启
@@ -33,7 +33,8 @@ spring:
 
   servlet:
     multipart: # 文件上传配置
-      enabled: false
+      max-file-size: 10MB
+      enabled: true
   task:
     scheduling: # 定时任务线程池配置
       pool:

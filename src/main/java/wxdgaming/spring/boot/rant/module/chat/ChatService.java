@@ -7,6 +7,7 @@ import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.lang.RunResult;
 import wxdgaming.spring.boot.core.threading.LogicExecutor;
 import wxdgaming.spring.boot.core.timer.MyClock;
+import wxdgaming.spring.boot.core.util.HtmlDecoder;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.SessionHandler;
 import wxdgaming.spring.boot.net.SocketSession;
@@ -27,8 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Service
 public class ChatService implements SessionHandler {
 
-    final String NICK_KEY = "NICK_KEY";
-    final String ADDRESS_KEY = "ADDRESS_KEY";
+    final String BindKey = "__bind_key";
 
     final LogicExecutor logicExecutor;
     SocketService socketService;
@@ -54,18 +54,25 @@ public class ChatService implements SessionHandler {
         runResult.fluentPut("cmd", cmd);
         switch (cmd) {
             case "ping":
-                break;
+                session.writeAndFlush(runResult.toJSONString());
+                return;
+            case "chat-img":
             case "chat": {
-                runResult.put("nick", session.attribute(NICK_KEY));
+                ChatLoginInfo chatLoginInfo = session.attribute(BindKey);
+                if (chatLoginInfo == null) {
+                    /*尚未登录不允许发言*/
+                    return;
+                }
+                runResult.put("nick", chatLoginInfo.getNickName());
                 runResult.put("time", MyClock.nowString());
-                runResult.put("address", session.attribute(ADDRESS_KEY));
+                runResult.put("address", chatLoginInfo.getIpAddress());
                 String content = jsonObject.getString("content");
                 if (StringsUtil.emptyOrNull(content)) {
                     return;
                 }
                 content = content.trim();
-                if (content.length() > 200)
-                    content = content.substring(0, 200) + "...";
+                if (content.length() > 400)
+                    content = content.substring(0, 400) + "...";
                 runResult.put("content", content);
                 roomLock.lock();
                 try {
@@ -79,26 +86,29 @@ public class ChatService implements SessionHandler {
             }
             break;
             case "login": {
+                ChatLoginInfo chatLoginInfo = new ChatLoginInfo();
                 String nick = String.valueOf(jsonObject.getOrDefault("nick", "匿名"));
-                if (nick.length() > 16) {
-                    nick = nick.substring(0, 16) + "...";
+                if (nick.length() > 20) {
+                    nick = nick.substring(0, 20) + "...";
                 }
-                session.attribute(NICK_KEY, nick);
+                nick = HtmlDecoder.escapeHtml3(nick);
+                chatLoginInfo.setNickName(nick);
                 logicExecutor.execute(() -> {
                     try {
                         if ("127.0.0.1".equals(session.getIP())
                             || "localhost".equalsIgnoreCase(session.getIP())
                             || session.getIP().startsWith("192.168")) {
-                            session.attribute(ADDRESS_KEY, "内网");
+                            chatLoginInfo.setIpAddress("内网");
                         } else {
                             IPInfo city4Ip = httpClientService.getCity4Ip(session.getIP());
-                            session.attribute(ADDRESS_KEY, city4Ip.getRegionName() + "." + city4Ip.getCity());
+                            chatLoginInfo.setIpAddress(city4Ip.getRegionName() + "." + city4Ip.getCity());
                         }
                     } catch (Exception ignore) {
-                        session.attribute(ADDRESS_KEY, "外星球");
+                        chatLoginInfo.setIpAddress("外星球");
                         log.warn("ip查询失败{}", ignore.toString());
                     }
                 });
+                session.attribute(BindKey, chatLoginInfo);
                 String jsonString;
                 roomLock.lock();
                 try {
@@ -109,9 +119,13 @@ public class ChatService implements SessionHandler {
                 } finally {
                     roomLock.unlock();
                 }
-                socketService.writeAndFlush(jsonString);
+                /*回复自己登录成功*/
+                session.writeAndFlush(jsonString);
             }
             break;
+            default:
+                log.warn("未知命令{}", cmd);
+                return;
         }
         socketService.writeAndFlush(runResult.toJSONString());
         log.info("action:{}", jsonObject);
