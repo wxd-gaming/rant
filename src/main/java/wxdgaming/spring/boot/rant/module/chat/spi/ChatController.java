@@ -40,7 +40,8 @@ public class ChatController {
             if (newFileName.endsWith(".jpg")
                 || newFileName.endsWith(".jpeg")
                 || newFileName.endsWith(".png")
-                || newFileName.endsWith(".gif")) {
+                || newFileName.endsWith(".gif")
+                || newFileName.endsWith(".mp4")) {
                 File path = new File("upload/" + newFileName);
                 FileWriteUtil.writeBytes(path, bytes);
                 return RunResult.ok().data(newFileName);
@@ -57,7 +58,7 @@ public class ChatController {
     @Scheduled(cron = "0 0 * * * *")
     public void clearUploadFiles() throws IOException {
         FileUtil.walkFiles("upload")
-                .filter(path -> System.currentTimeMillis() - path.toFile().lastModified() < TimeUnit.DAYS.toMillis(10))
+                .filter(path -> System.currentTimeMillis() - path.toFile().lastModified() > TimeUnit.DAYS.toMillis(1))
                 .forEach(path -> FileUtil.del(path));
     }
 
