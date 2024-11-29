@@ -52,21 +52,27 @@
             console.log("ws_url=" + ws_url);
             wsClient.onRead = (data) => {
                 var msg = JSON.parse(data);
+                if (msg.code !== 1) {
+                    wxd.message.notice(msg.error);
+                    return;
+                }
                 if (msg.cmd === "ping") {
 
                 } else if (msg.cmd === "logined") {
+                    for (const msgElement of msg.history) {
+                        addChatContent(msgElement);
+                    }
+                    let newSpit = {};
+                    newSpit.nick = "";
+                    newSpit.time = "";
+                    newSpit.address = "";
+                    newSpit.content = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-----------------------------------------------------新消息-----------------------------------------------------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                    addChatContent(newSpit);
                     loginEnd = true;
                 } else if (msg.cmd === "login") {
                     wxd.message.notice("欢迎 " + msg.nick + " 进入聊天室");
                 } else {
-                    let content = `
-                    <div class="chat-content">
-                        <p>${msg.nick} ${msg.time} ${msg.address}</p>
-                        <p>${msg.content}</p>
-                    </div>
-                `;
-                    $("#chat-box").append(content);
-                    $("#chat-box").scrollTop($("#chat-box").scrollTop() + 500);
+                    addChatContent(msg);
                 }
             };
 
@@ -92,6 +98,17 @@
             }
 
         });
+
+        function addChatContent(msg) {
+            let content = `
+                    <div class="chat-content">
+                        <p>${msg.nick} ${msg.time} ${msg.address}</p>
+                        <p>${msg.content}</p>
+                    </div>
+                `;
+            $("#chat-box").append(content);
+            $("#chat-box").scrollTop($("#chat-box").scrollTop() + 500);
+        }
 
         function login() {
             localStorage.setItem("chat-nick-name", $("#nick-input").val());

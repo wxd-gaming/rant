@@ -7,11 +7,15 @@ import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.lang.RunResult;
 import wxdgaming.spring.boot.core.threading.LogicExecutor;
 import wxdgaming.spring.boot.core.timer.MyClock;
+import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.SessionHandler;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.server.SocketService;
 import wxdgaming.spring.boot.webclient.HttpClientService;
 import wxdgaming.spring.boot.webclient.IPInfo;
+
+import java.util.LinkedList;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 聊天服务
@@ -29,6 +33,9 @@ public class ChatService implements SessionHandler {
     final LogicExecutor logicExecutor;
     SocketService socketService;
     final HttpClientService httpClientService;
+    private final ReentrantLock roomLock = new ReentrantLock();
+    /** 历史聊天记录 */
+    LinkedList<RunResult> history = new LinkedList<>();
 
     public ChatService(HttpClientService httpClientService, LogicExecutor logicExecutor) {
         this.httpClientService = httpClientService;
@@ -52,11 +59,30 @@ public class ChatService implements SessionHandler {
                 runResult.put("nick", session.attribute(NICK_KEY));
                 runResult.put("time", MyClock.nowString());
                 runResult.put("address", session.attribute(ADDRESS_KEY));
-                runResult.put("content", jsonObject.getString("content"));
+                String content = jsonObject.getString("content");
+                if (StringsUtil.emptyOrNull(content)) {
+                    return;
+                }
+                content = content.trim();
+                if (content.length() > 200)
+                    content = content.substring(0, 200) + "...";
+                runResult.put("content", content);
+                roomLock.lock();
+                try {
+                    history.add(runResult);
+                    if (history.size() > 1000) {
+                        history.removeFirst();
+                    }
+                } finally {
+                    roomLock.unlock();
+                }
             }
             break;
             case "login": {
                 String nick = String.valueOf(jsonObject.getOrDefault("nick", "匿名"));
+                if (nick.length() > 16) {
+                    nick = nick.substring(0, 16) + "...";
+                }
                 session.attribute(NICK_KEY, nick);
                 logicExecutor.execute(() -> {
                     try {
@@ -73,8 +99,17 @@ public class ChatService implements SessionHandler {
                         log.warn("ip查询失败{}", ignore.toString());
                     }
                 });
-                runResult.put("nick", nick);
-                socketService.writeAndFlush(RunResult.ok().fluentPut("cmd", "logined").toJSONString());
+                String jsonString;
+                roomLock.lock();
+                try {
+                    runResult.put("nick", nick);
+                    RunResult logined = RunResult.ok().fluentPut("cmd", "logined");
+                    logined.fluentPut("history", history);
+                    jsonString = logined.toJSONString();
+                } finally {
+                    roomLock.unlock();
+                }
+                socketService.writeAndFlush(jsonString);
             }
             break;
         }
