@@ -148,6 +148,14 @@
         }
 
         function sendImg() {
+            if (!wsClient.socketOpen) {
+                wxd.message.notice("socket 异常");
+                return;
+            }
+            if (!loginEnd) {
+                wxd.message.notice("未登录");
+                return;
+            }
             wxd.netty.upload("/chat/upload", null, function (data) {
                 if (data.code !== 1) {
                     wxd.message.notice(data.error);

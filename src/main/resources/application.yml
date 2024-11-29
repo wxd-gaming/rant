@@ -23,7 +23,7 @@ spring:
   web:
     resources:
       add-mappings: true
-      static-locations: classpath:/public/,file:upload/
+      static-locations: file:public/,file:upload/,classpath:/public/
       chain:
         compressed: true    #开启压缩
         enabled: true       #开启
