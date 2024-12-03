@@ -21,10 +21,17 @@
 
         .chat-content {
             margin-top: 10px;
+            border: #D3D3D3 2px solid;
+            border-radius: 8px;
+            padding: 5px;
         }
 
+        .chat-content h3 {display: inline-block;}
+
         .chat-content p {
-            margin-top: 10px;
+            display: block;
+            margin-top: 5px;
+            padding: 10px;
             text-wrap: auto;
             word-break: break-all;
             white-space: pre-wrap !important;
@@ -64,12 +71,7 @@
                     for (const msgElement of msg.history) {
                         addChatContent(msgElement);
                     }
-                    let newSpit = {};
-                    newSpit.nick = "";
-                    newSpit.time = "";
-                    newSpit.address = "";
-                    newSpit.content = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-----------------------------------------------------新消息-----------------------------------------------------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                    addChatContent(newSpit);
+                    $("#chat-box").append(`<div style="text-align: center;margin-top: 15px;margin-bottom: 10px;">----------------------新消息-----------------</div>`);
                     loginEnd = true;
                 } else if (msg.cmd === "login") {
                     wxd.message.notice("欢迎 " + msg.nick + " 进入聊天室");
@@ -101,13 +103,36 @@
 
         });
 
+
+        /*!----感谢老板娘友情提供---*/
+        let ColorValues = [
+            "f6a5a5", "f6a5c2", "f6a5d8", "f6a5ed",
+            "e0a5f6", "c0a5f6", "b0a5f6", "a5b4f6",
+            "a5d3f6", "a5eff6", "a5f6d7", "a5f6b2",
+            "d1f6a5", "f6eca5", "f6cfa5", "f97d68",
+            "f7ab59", "e58927", "f6c828", "b5e248",
+            "48dde2", "4885e2", "484be2", "8d48e2",
+            "bb3c3c"
+        ];
+
+        /**
+         * 获取一个随机颜色值
+         * @returns {string} 颜色代码
+         */
+        function getRandomColor() {
+            return ColorValues[Math.floor(Math.random() * ColorValues.length)];
+        }
+
         function addChatContent(msg) {
             if (msg.cmd === "chat-img") {
-                msg.content = `<object data="${msg.content}" style="max-width: 90%;max-height: 280px;"></object>`;
+                msg.content = `<object data="${msg.content}" style="max-width: 90%;max-height: 320px;"></object>`;
             }
+
+            let bgColor = getRandomColor();
+
             let content = `
-                    <div class="chat-content">
-                        <p>${msg.nick} ${msg.time} ${msg.address}</p>
+                    <div class="chat-content" style="background-color: #${bgColor};">
+                        <div style="border-bottom: #D3D3D3 1px solid;padding: 5px;"><h3>${msg.nick}</h3> ${msg.time} ${msg.address}</div>
                         <p>${msg.content}</p>
                     </div>
                 `;
@@ -185,7 +210,7 @@
 <div>
     <div id="chat-box" style="position: absolute;left: 5px;top:0;right: 2px; bottom: 120px;overflow-y: scroll;">
         <div class="chat-content" style="">
-            <p>無心道 2024-11-27 20:20:20 浙江.杭州</p>
+            <div style="border-bottom: #D3D3D3 1px solid;"><h3>無心道</h3> 2024-11-27 20:20:20 浙江.杭州</div>
             <p>ccccccc</p>
         </div>
     </div>
