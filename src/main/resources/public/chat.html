@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>聊天室</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <script charset="utf-8" type="text/javascript" src="/jquery/2.1.4/jquery.min.js"></script>
     <script charset="utf-8" type="text/javascript" src="/jquery-ui/1.13.1/jquery-ui.js"></script>
     <script charset="utf-8" type="text/javascript" src="/js/com.wxd.js"></script>
@@ -125,6 +127,7 @@
             }
             localStorage.setItem("chat-nick-name", value);
             wsClient.sendMsg(new wxd.Map().put("cmd", "login").put("nick", value).toJson());
+            $("#login-bg").remove();
         }
 
         function sendChat() {
@@ -144,6 +147,7 @@
                 wxd.message.notice("内容太多");
                 return;
             }
+            $("#chat-input").val("");
             wsClient.sendMsg(new wxd.Map().put("cmd", "chat").put("content", content).toJson());
         }
 
@@ -162,24 +166,30 @@
                     return;
                 }
                 wsClient.sendMsg(new wxd.Map().put("cmd", "chat-img").put("content", data.data).toJson());
+                wxd.netty.uploadClose();
             });
         }
     </script>
 </head>
 <body>
-<div>
-    <div id="chat-title" style="width: 160px;position: absolute;left: 0;top:0;bottom: 0;">
-        公共聊天室
-        <input id="nick-input" style="width: calc(100% - 5px);" value="匿名">
-        <button id="login-btn" style="width: calc(100% - 5px);height: 30px;" onclick="login()">登录</button>
+<div id="login-bg" style="position: absolute;left: 0;top: 0;right: 0;bottom: 0;background-color: rgba(28,28,28,0.73);z-index: 99;">
+    <div style="width: 260px; height: 140px;position: absolute;left: 50%;top:40%;transform: translate(-50%, -50%);background-color: white;border-radius: 8px;align-items: center;justify-content: center;padding-left: 15px;">
+        <h3>公共聊天室</h3>
+        <br>
+        <input id="nick-input" style="width: calc(100% - 25px);" placeholder="昵称" value="匿名">
+        <br>
+        <br>
+        <button id="login-btn" style="width: 40px;height: 22px;" onclick="login()">登录</button>
     </div>
-    <div id="chat-box" style="position: absolute;left: 161px;top:0;right: 2px; bottom: 120px;overflow-y: scroll;">
+</div>
+<div>
+    <div id="chat-box" style="position: absolute;left: 5px;top:0;right: 2px; bottom: 120px;overflow-y: scroll;">
         <div class="chat-content" style="">
             <p>無心道 2024-11-27 20:20:20 浙江.杭州</p>
             <p>ccccccc</p>
         </div>
     </div>
-    <div style="position: absolute;left: 161px;right: 0; bottom: 0;height: 120px;align-items: center;justify-content: center;display: flex;">
+    <div style="position: absolute;left: 5px;right: 0; bottom: 0;height: 120px;align-items: center;justify-content: center;display: flex;">
         <textarea id="chat-input" style="width: calc(100% - 150px);height: calc(100% - 15px);"></textarea>
         <button id="chat-send" style="height: calc(100% - 15px);width: 50px;margin-left: 5px;" onclick="sendChat()">
             发送

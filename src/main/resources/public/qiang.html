@@ -36,7 +36,7 @@
 
         .item .title {display: inline-block;padding-left: 15px;}
 
-        .item p {display: inline-block;padding-left: 15px; padding-bottom: 5px;color: black;}
+        .item p {display: inline-block;padding-left: 15px; padding-bottom: 5px;color: black;overflow: hidden;}
 
         .item .content {
             display: block;
@@ -374,7 +374,7 @@
             let box = `
 <div id="box_${row.uid}" class="rant item" style="background:#${bgColor};${box_flex};display: none;">
     <h3 class="title">${row.nickName}</h3>
-    <p>${row.address}&nbsp;&nbsp;${row.time}</p>
+    <p>${row.time}&nbsp;&nbsp;${row.address}</p>
     <pre class="content" tips="true">${row.content}</pre>
     <label>
         <a href="javascript:void(0)" onclick="like(this,${row.uid})"><img src="img/like.png" alt="赞"/></a><span id="span_like_${row.uid}">(${row.likeCount})</span>
