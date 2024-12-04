@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>吐槽</title>
+    <title>随心-留言墙</title>
     <script charset="utf-8" type="text/javascript" src="/jquery/2.1.4/jquery.min.js"></script>
     <script charset="utf-8" type="text/javascript" src="/jquery-ui/1.13.1/jquery-ui.js"></script>
     <script charset="utf-8" type="text/javascript" src="/js/com.wxd.js"></script>
@@ -19,12 +19,14 @@
             background-image: linear-gradient(#B6E8DB, #15B0C9);
         }
 
+        button {border: #9c9c9c 1px solid;background-color: skyblue;box-shadow: 3px 3px 3px 1px #9c9c9c;padding: 5px 7px;border-radius: 5px;height: 28px;}
+
         .item {
             display: inline-block;
             position: relative;
             width: 290px;
             height: 170px;
-            box-shadow: 0 2px 10px 1px #7F7F7F;
+            box-shadow: 0 2px 10px 1px #9c9c9c;
             border-bottom-left-radius: 20px 500px;
             border-bottom-right-radius: 500px 30px;
             border-top-left-radius: 25px;
@@ -34,9 +36,9 @@
             -webkit-user-select: none; /* webkit浏览器 */ -moz-user-select: none; /* Firefox */ -ms-user-select: none; /* IE10+ */ user-select: none; /* 标准语法 */
         }
 
-        .item .title {display: inline-block;padding-left: 15px;}
+        .item .title {display: inline-block;padding-left: 15px;overflow: hidden;text-wrap: nowrap;max-width: 85px;}
 
-        .item p {display: inline-block;padding-left: 15px; padding-bottom: 5px;color: black;overflow: hidden;}
+        .item p {display: inline-block;padding-left: 15px; padding-bottom: 0;color: black;overflow: hidden;text-wrap: nowrap;width: 180px;}
 
         .item .content {
             display: block;
@@ -520,12 +522,12 @@
 <div class="rant_box">
     <div class="rant item" style="background:#E3E197;">
         <h3 class="title">温馨提示</h3>
-        <p>北京市.北京 10/27 22:22 </p>
+        <p>10/27 22:22 北京市.北京</p>
         <pre class="content" tips="true">当你选择关闭标签的时候，它将会记录在本地，关闭浏览器再打开也会看不到，只有点击上方的刷新按钮，才会重新加载。</pre>
         <label>
-            <a href="javascript:void(0)" onclick="wxd.message.notice('我是系统框')"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
-            <a href="javascript:void(0)" onclick="wxd.message.notice('我是系统框')"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
-            <a href="javascript:void(0)" onclick="">评论</a><span>(11)</span>
+            <a href="javascript:void(0)" onclick="wxd.message.notice('我是系统提示')"><img src="img/like.png" alt="赞"/></a><span>(11)</span>
+            <a href="javascript:void(0)" onclick="wxd.message.notice('我是系统提示')"><img src="img/dislike.png" alt="踩"/></a><span>(111)</span>
+            <a href="javascript:void(0)" onclick="wxd.message.notice('我是系统提示')">评论</a><span>(11)</span>
             <a href="javascript:void(0)" onclick="$(this).parent().parent().remove();">屏蔽</a>
         </label>
     </div>

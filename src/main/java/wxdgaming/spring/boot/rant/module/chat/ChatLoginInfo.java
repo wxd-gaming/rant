@@ -14,6 +14,7 @@ import wxdgaming.spring.boot.core.lang.ObjectBase;
 @Setter
 public class ChatLoginInfo extends ObjectBase {
 
+    private String uid;
     private String nickName;
     private String ipAddress;
     private String loginTime;

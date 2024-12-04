@@ -19,11 +19,18 @@
 
         html, body {overflow: hidden;width: 100%;height: 100%;}
 
+        button {background-color: skyblue;box-shadow: 3px 3px 3px 1px #9c9c9c;}
+
         .chat-content {
-            margin-top: 10px;
+            margin-top: 18px;
             border: #D3D3D3 2px solid;
-            border-radius: 8px;
             padding: 5px;
+            border-radius: 8px;
+            box-shadow: 5px 5px 8px 2px #9c9c9c;
+            /*border-bottom-left-radius: 20px 500px;*/
+            /*border-bottom-right-radius: 500px 30px;*/
+            /*border-top-left-radius: 25px;*/
+            /*border-top-right-radius: 25px;*/
         }
 
         .chat-content h3 {display: inline-block;}
@@ -39,11 +46,33 @@
             *white-space: normal !important;
             letter-spacing: 2px; /* 增加字符间距 */
         }
+
+        #chat-input {
+            width: calc(100% - 135px);
+            height: calc(100% - 15px);
+            border: #3d4d5d solid 2px;
+            border-right: 0;
+            border-radius: 5px 0 0 5px;
+            padding: 3px;
+            box-shadow: 3px 3px 3px 1px #9c9c9c;
+        }
+
+        #chat-send {
+            height: calc(100% - 15px);
+            width: 60px;
+            border-left: 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        #chat-img-send {
+            height: calc(100% - 15px);width: 60px;margin-left: 5px;border-radius: 5px;
+        }
     </style>
     <script>
         var pingMessage = new wxd.Map().put("cmd", "ping").toJson();
         var wsClient = new wxd.netty.WSClient();
         let ws_url = "";
+        let uid = null;
         let loginEnd = false;
 
 
@@ -68,6 +97,8 @@
                 if (msg.cmd === "ping") {
 
                 } else if (msg.cmd === "logined") {
+                    localStorage.setItem("chat-token", msg.token)
+                    uid = msg.uid;
                     for (const msgElement of msg.history) {
                         addChatContent(msgElement);
                     }
@@ -104,6 +135,8 @@
         });
 
 
+        let uidColor = new wxd.Map();
+
         /*!----感谢老板娘友情提供---*/
         let ColorValues = [
             "f6a5a5", "f6a5c2", "f6a5d8", "f6a5ed",
@@ -119,8 +152,14 @@
          * 获取一个随机颜色值
          * @returns {string} 颜色代码
          */
-        function getRandomColor() {
-            return ColorValues[Math.floor(Math.random() * ColorValues.length)];
+        function getRandomColor(uid) {
+            //每次都给同一个uid 分配一个颜色
+            let newVar = uidColor.get(uid);
+            if (wxd.isNull(newVar)) {
+                newVar = ColorValues[Math.floor(Math.random() * ColorValues.length)];
+                uidColor.put(uid, newVar);
+            }
+            return newVar;
         }
 
         function addChatContent(msg) {
@@ -128,7 +167,11 @@
                 msg.content = `<object data="${msg.content}" style="max-width: 90%;max-height: 320px;"></object>`;
             }
 
-            let bgColor = getRandomColor();
+            let bgColor = "ffffff";
+
+            if (msg.uid !== uid) {
+                bgColor = getRandomColor(msg.uid);
+            }
 
             let content = `
                     <div class="chat-content" style="background-color: #${bgColor};">
@@ -151,7 +194,15 @@
                 return;
             }
             localStorage.setItem("chat-nick-name", value);
-            wsClient.sendMsg(new wxd.Map().put("cmd", "login").put("nick", value).toJson());
+            var token = localStorage.getItem("chat-token");
+            if (wxd.isNull(token)) {
+                token = "";
+            }
+            var map = new wxd.Map()
+                .put("cmd", "login")
+                .put("token", token)
+                .put("nick", value);
+            wsClient.sendMsg(map.toJson());
             $("#login-bg").remove();
         }
 
@@ -190,39 +241,48 @@
                     wxd.message.notice(data.error);
                     return;
                 }
-                wsClient.sendMsg(new wxd.Map().put("cmd", "chat-img").put("content", data.data).toJson());
+                var token = localStorage.getItem("chat-token");
+                var map = new wxd.Map()
+                    .put("cmd", "chat-img")
+                    .put("token", token)
+                    .put("content", data.data);
+                wsClient.sendMsg(map.toJson());
                 wxd.netty.uploadClose();
             });
         }
     </script>
 </head>
 <body>
-<div id="login-bg" style="position: absolute;left: 0;top: 0;right: 0;bottom: 0;background-color: rgba(28,28,28,0.73);z-index: 99;">
+<div id="login-bg" style="display: none;position: absolute;left: 0;top: 0;right: 0;bottom: 0;background-color: rgba(28,28,28,0.73);z-index: 99;">
     <div style="width: 260px; height: 140px;position: absolute;left: 50%;top:40%;transform: translate(-50%, -50%);background-color: white;border-radius: 8px;align-items: center;justify-content: center;padding-left: 15px;">
         <h3>公共聊天室</h3>
         <br>
-        <input id="nick-input" style="width: calc(100% - 25px);" placeholder="昵称" value="匿名">
+        <input id="nick-input" style="width: calc(100% - 25px);height: 28px;" placeholder="昵称" value="匿名">
         <br>
         <br>
-        <button id="login-btn" style="width: 40px;height: 22px;" onclick="login()">登录</button>
+        <button id="login-btn" style="width: 80px;height: 26px;border-radius: 4px;border: 0;" onclick="login()">
+            登录
+        </button>
     </div>
 </div>
-<div>
-    <div id="chat-box" style="position: absolute;left: 5px;top:0;right: 2px; bottom: 120px;overflow-y: scroll;">
-        <div class="chat-content" style="">
-            <div style="border-bottom: #D3D3D3 1px solid;"><h3>無心道</h3> 2024-11-27 20:20:20 浙江.杭州</div>
-            <p>ccccccc</p>
-        </div>
+<div id="chat-box" style="position: absolute;left: 10px;top:0;right: 0; bottom: 120px;overflow-y: scroll;padding-right: 10px;">
+    <div class="chat-content" style="display: block;">
+        <div style="border-bottom: #D3D3D3 1px solid;"><h3>無心道</h3> 2024-11-27 20:20:20 浙江.杭州</div>
+        <p>ccccccc</p>
     </div>
-    <div style="position: absolute;left: 5px;right: 0; bottom: 0;height: 120px;align-items: center;justify-content: center;display: flex;">
-        <textarea id="chat-input" style="width: calc(100% - 150px);height: calc(100% - 15px);"></textarea>
-        <button id="chat-send" style="height: calc(100% - 15px);width: 50px;margin-left: 5px;" onclick="sendChat()">
-            发送
-        </button>
-        <button id="chat-img-send" style="height: calc(100% - 15px);width: 50px;margin-left: 5px;" onclick="sendImg()">
-            文件
-        </button>
+    <div class="chat-content" style="display: block;">
+        <div style="border-bottom: #D3D3D3 1px solid;"><h3>無心道</h3> 2024-11-27 20:20:20 浙江.杭州</div>
+        <p>ccccccc</p>
     </div>
+</div>
+<div style="position: absolute;left: 5px;right: 18px; bottom: 0;height: 120px;align-items: center;justify-content: center;display: flex;">
+    <textarea id="chat-input"></textarea>
+    <button id="chat-send" onclick="sendChat()">
+        发送
+    </button>
+    <button id="chat-img-send" onclick="sendImg()">
+        文件
+    </button>
 </div>
 <!--<div id="login_bg" style="position: absolute;left: 0;top:0;right: 0; bottom: 0;">-->
 

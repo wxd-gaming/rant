@@ -1,13 +1,18 @@
 package wxdgaming.spring.boot.rant.module.chat;
 
 import com.alibaba.fastjson.JSONObject;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.ann.Start;
+import wxdgaming.spring.boot.core.format.HexId;
 import wxdgaming.spring.boot.core.lang.RunResult;
 import wxdgaming.spring.boot.core.threading.LogicExecutor;
 import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.boot.core.util.HtmlDecoder;
+import wxdgaming.spring.boot.core.util.JwtUtils;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.SessionHandler;
 import wxdgaming.spring.boot.net.SocketSession;
@@ -29,7 +34,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ChatService implements SessionHandler {
 
     final String BindKey = "__bind_key";
-
+    final String jwtKEy = "__jwt_keysdfsgewgwegfhsodifjwsoeitgjwegsogiwegweg";
+    final HexId hexId = new HexId(1);
     final LogicExecutor logicExecutor;
     SocketService socketService;
     final HttpClientService httpClientService;
@@ -40,6 +46,7 @@ public class ChatService implements SessionHandler {
     public ChatService(HttpClientService httpClientService, LogicExecutor logicExecutor) {
         this.httpClientService = httpClientService;
         this.logicExecutor = logicExecutor;
+
     }
 
     @Start
@@ -63,6 +70,7 @@ public class ChatService implements SessionHandler {
                     /*尚未登录不允许发言*/
                     return;
                 }
+                runResult.put("uid", chatLoginInfo.getUid());
                 runResult.put("nick", chatLoginInfo.getNickName());
                 runResult.put("time", MyClock.nowString());
                 runResult.put("address", chatLoginInfo.getIpAddress());
@@ -87,6 +95,19 @@ public class ChatService implements SessionHandler {
             break;
             case "login": {
                 ChatLoginInfo chatLoginInfo = new ChatLoginInfo();
+                String token = jsonObject.getString("token");
+                try {
+                    if (StringsUtil.notEmptyOrNull(token)) {
+                        Jws<Claims> claimsJws = JwtUtils.parseJWT(jwtKEy, token);
+                        String uid = claimsJws.getPayload().get("uid", String.class);
+                        chatLoginInfo.setUid(uid);
+                    }
+                } catch (Exception e) {
+                    log.error("token {}", token, e);
+                }
+                if (StringsUtil.emptyOrNull(chatLoginInfo.getUid())) {
+                    chatLoginInfo.setUid(String.valueOf(hexId.newId()));
+                }
                 String nick = String.valueOf(jsonObject.getOrDefault("nick", "匿名"));
                 if (nick.length() > 20) {
                     nick = nick.substring(0, 20) + "...";
@@ -112,9 +133,15 @@ public class ChatService implements SessionHandler {
                 String jsonString;
                 roomLock.lock();
                 try {
-                    runResult.put("nick", nick);
-                    RunResult logined = RunResult.ok().fluentPut("cmd", "logined");
-                    logined.fluentPut("history", history);
+                    runResult.put("nick", chatLoginInfo.getNickName());
+
+                    JwtBuilder jwt = JwtUtils.createJwt(jwtKEy);
+                    jwt.claim("uid", chatLoginInfo.getUid());
+                    RunResult logined = RunResult.ok()
+                            .fluentPut("cmd", "logined")
+                            .fluentPut("token", jwt.compact())
+                            .fluentPut("uid", chatLoginInfo.getUid())
+                            .fluentPut("history", history);
                     jsonString = logined.toJSONString();
                 } finally {
                     roomLock.unlock();
