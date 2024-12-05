@@ -33,7 +33,7 @@ spring:
 
   servlet:
     multipart: # 文件上传配置
-      max-file-size: 15MB
+      max-file-size: 35MB
       enabled: true
   task:
     scheduling: # 定时任务线程池配置
