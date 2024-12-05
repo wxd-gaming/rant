@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import wxdgaming.spring.boot.data.batis.EntityBase;
+import wxdgaming.spring.boot.data.EntityBase;
 
 /**
  * 回复详情

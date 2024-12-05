@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import wxdgaming.spring.boot.core.CoreScan;
 import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.ann.Start;
-import wxdgaming.spring.boot.data.batis.DataBatisScan;
+import wxdgaming.spring.boot.data.batis.DataJdbcScan;
 import wxdgaming.spring.boot.net.NetScan;
 import wxdgaming.spring.boot.rant.drive.DriveScan;
 import wxdgaming.spring.boot.web.WebScan;
@@ -21,7 +21,7 @@ import wxdgaming.spring.boot.webclient.WebClientScan;
 @SpringBootApplication(
         scanBasePackageClasses = {
                 CoreScan.class,
-                DataBatisScan.class,
+                DataJdbcScan.class,
                 DriveScan.class,
                 NetScan.class,
                 WebScan.class,

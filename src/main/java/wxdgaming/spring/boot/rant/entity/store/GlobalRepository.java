@@ -1,7 +1,7 @@
 package wxdgaming.spring.boot.rant.entity.store;
 
 import org.springframework.stereotype.Repository;
-import wxdgaming.spring.boot.data.batis.BaseJpaRepository;
+import wxdgaming.spring.boot.data.batis.BaseRepository;
 import wxdgaming.spring.boot.rant.entity.bean.GlobalData;
 
 /**
@@ -11,7 +11,7 @@ import wxdgaming.spring.boot.rant.entity.bean.GlobalData;
  * @version: 2024-10-14 13:53
  **/
 @Repository
-public interface GlobalRepository extends BaseJpaRepository<GlobalData, Integer> {
+public interface GlobalRepository extends BaseRepository<GlobalData, Integer> {
 
 
 }
