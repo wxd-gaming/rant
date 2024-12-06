@@ -103,6 +103,7 @@
                         addChatContent(msgElement);
                     }
                     $("#chat-box").append(`<div style="text-align: center;margin-top: 15px;margin-bottom: 10px;">----------------------新消息-----------------</div>`);
+                    moveBottom();
                     loginEnd = true;
                 } else if (msg.cmd === "login") {
                     wxd.message.notice("欢迎 " + msg.nick + " 进入聊天室");
@@ -180,7 +181,19 @@
                     </div>
                 `;
             $("#chat-box").append(content);
-            $("#chat-box").scrollTop($("#chat-box").scrollTop() + 500);
+            moveBottom();
+        }
+
+        function moveBottom() {
+            // 获取目标div的底部位置
+            var $chat = $("#chat-box");
+            var targetBottom = $chat.offset().top + $chat.outerHeight(true);
+            // 滚动到目标div的底部
+            $chat.scrollTop(targetBottom);
+            // $chat.animate({
+            //     scrollTop: targetBottom
+            // }, 500); // 1000表示动画的持续时间，单位为毫秒
+            // $chat.scrollTop($chat[0].scrollHeight + 500);
         }
 
         function login() {
