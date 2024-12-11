@@ -4,7 +4,7 @@ server:
   tomcat:
     initial-size: 64 #初始化内存
     min-free-size: 64 #最小内存
-    max-size: 256     #最小内存
+    max-size: 356     #最小内存
     max-threads: 100
     min-spare-threads: 10
   compression:
@@ -19,7 +19,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   profiles:
-    active: mysql,socket
+    active: h2,socket
   web:
     resources:
       add-mappings: true
@@ -33,7 +33,8 @@ spring:
 
   servlet:
     multipart: # 文件上传配置
-      max-file-size: 35MB
+      max-file-size: 50MB
+      max-request-size: 50MB
       enabled: true
   task:
     scheduling: # 定时任务线程池配置

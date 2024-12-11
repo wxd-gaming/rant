@@ -165,7 +165,14 @@
 
         function addChatContent(msg) {
             if (msg.cmd === "chat-img") {
-                msg.content = `<object data="${msg.content}" style="max-width: 90%;max-height: 320px;"></object>`;
+                if (msg.content.endsWith(".mp4")) {
+                    msg.content = `<video controls width="100%" style="max-width: 98%;">
+                            <source src="${msg.content}" type="video/mp4">
+                            您的浏览器不支持 video 标签。
+                          </video>`;
+                } else {
+                    msg.content = `<object data="${msg.content}" style="max-width: 98%;"></object>`;
+                }
             }
 
             let bgColor = "ffffff";
