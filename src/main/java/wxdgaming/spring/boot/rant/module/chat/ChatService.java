@@ -46,7 +46,6 @@ public class ChatService implements SessionHandler {
     public ChatService(HttpClientService httpClientService, LogicExecutor logicExecutor) {
         this.httpClientService = httpClientService;
         this.logicExecutor = logicExecutor;
-
     }
 
     @Start

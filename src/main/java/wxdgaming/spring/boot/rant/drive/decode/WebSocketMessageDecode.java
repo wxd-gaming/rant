@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
-import wxdgaming.spring.boot.net.MessageDispatcher;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.server.ServerMessageDecode;
+import wxdgaming.spring.boot.net.server.ServerMessageDispatcher;
 import wxdgaming.spring.boot.rant.module.chat.ChatService;
 
 /**
@@ -27,8 +27,8 @@ public class WebSocketMessageDecode extends ServerMessageDecode implements InitP
     ChatService chatService;
 
     @Autowired
-    public WebSocketMessageDecode(BootstrapBuilder bootstrapBuilder, MessageDispatcher dispatcher) {
-        super(bootstrapBuilder, dispatcher);
+    public WebSocketMessageDecode(BootstrapBuilder bootstrapBuilder, ServerMessageDispatcher serverMessageDispatcher) {
+        super(bootstrapBuilder, serverMessageDispatcher);
     }
 
     @Start

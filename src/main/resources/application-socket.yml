@@ -1,9 +1,9 @@
 socket:
   debugLogger: false
   printLogger: true
-  server:
-    bossThreadSize: 2 #线程池的线程数量，共享
-    workerThreadSize: 10 #线程池的线程数量，共享
+  bossThreadSize: 2 #线程池的线程数量，共享
+  workerThreadSize: 10 #线程池的线程数量，共享
+  server1:
     config:
       port: 18001
       idleTimeout: 30 # 单位秒
