@@ -138,6 +138,11 @@
                                              erroronmissingdir="false">
                                     </fileset>
                                 </copy>
+                                <copy todir="${project.build.directory}/database" overwrite="true">
+                                    <fileset dir="${project.basedir}/database"
+                                             erroronmissingdir="false">
+                                    </fileset>
+                                </copy>
                             </target>
                         </configuration>
                     </execution>

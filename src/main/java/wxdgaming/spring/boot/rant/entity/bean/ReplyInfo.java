@@ -30,14 +30,14 @@ public class ReplyInfo extends EntityBase<Long> {
     private long rantId;
     /** 可能是回复某个贴贴里面的回复 */
     private long replyId;
-    @Column(columnDefinition = "varchar(64) comment 'ip'")
+    @Column(columnDefinition = "varchar(64)")
     private String ip;
-    @Column(columnDefinition = "varchar(128) comment 'ip'")
+    @Column(columnDefinition = "varchar(128)")
     private String ipAddress;
-    @Column(columnDefinition = "varchar(1024) comment '内容，不得超过1000个字'")
+    @Column(columnDefinition = "varchar(1024)")
     private String content;
-    @Column(columnDefinition = "int default 0 comment '点赞数'")
+    @Column(columnDefinition = "int")
     private long likeCount;
-    @Column(columnDefinition = "int default 0 comment '点踩数'")
+    @Column(columnDefinition = "int")
     private long dislikeCount;
 }

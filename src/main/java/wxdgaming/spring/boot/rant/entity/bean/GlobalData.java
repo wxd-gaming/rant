@@ -19,9 +19,9 @@ import wxdgaming.spring.boot.data.EntityBase;
 @Entity
 public class GlobalData extends EntityBase<Integer> {
 
-    @Column(nullable = false, columnDefinition = "bigint default 10000")
+    @Column(nullable = false, columnDefinition = "bigint")
     private long rantNewId = 10000;
-    @Column(nullable = false, columnDefinition = "bigint default 10000")
+    @Column(nullable = false, columnDefinition = "bigint")
     private long replyNewId = 10000;
 
     public GlobalData() {

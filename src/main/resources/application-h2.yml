@@ -8,7 +8,7 @@ spring:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
 
   db:
-    url: jdbc:h2:file:./target/rant
+    url: jdbc:h2:file:./database/rant
     username: root
     password: test
     driver-class-name: org.h2.Driver

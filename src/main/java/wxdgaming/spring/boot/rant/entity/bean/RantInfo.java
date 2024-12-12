@@ -26,21 +26,21 @@ import wxdgaming.spring.boot.data.EntityBase;
 })
 public class RantInfo extends EntityBase<Long> {
 
-    @Column(nullable = false, columnDefinition = "varchar(128) comment 'ip地址' ")
+    @Column(nullable = false, columnDefinition = "varchar(128)")
     private String ip;
-    @Column(nullable = false, columnDefinition = "varchar(128) default '' comment '例如四川.成都'")
+    @Column(nullable = false, columnDefinition = "varchar(128)")
     private String ipAddress;
     private int accountId;
     private boolean showNick = false;
     private String nickName;
-    @Column(columnDefinition = "varchar(1024) comment '吐槽内容，不得超过1000个字'")
+    @Column(columnDefinition = "varchar(1024)")
     private String content;
-    @Column(columnDefinition = "int default 0 comment '评论数'")
-    private int replyCount;
-    @Column(columnDefinition = "bigint default 0 comment '最后回复时间'")
-    private long lastReplyTime;
-    @Column(columnDefinition = "int default 0 comment '点赞数'")
+    @Column(columnDefinition = "int")
+    private int replyCount=0;
+    @Column(columnDefinition = "bigint")
+    private long lastReplyTime=0;
+    @Column(columnDefinition = "int")
     private long likeCount;
-    @Column(columnDefinition = "int default 0 comment '点踩数'")
+    @Column(columnDefinition = "int")
     private long dislikeCount;
 }
