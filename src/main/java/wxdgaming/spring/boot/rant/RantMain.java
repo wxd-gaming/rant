@@ -12,7 +12,6 @@ import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.data.batis.DataJdbcScan;
 import wxdgaming.spring.boot.net.NetScan;
-import wxdgaming.spring.boot.rant.drive.DriveScan;
 import wxdgaming.spring.boot.web.WebScan;
 import wxdgaming.spring.boot.webclient.WebClientScan;
 
@@ -22,7 +21,6 @@ import wxdgaming.spring.boot.webclient.WebClientScan;
         scanBasePackageClasses = {
                 CoreScan.class,
                 DataJdbcScan.class,
-                DriveScan.class,
                 NetScan.class,
                 WebScan.class,
                 WebClientScan.class,

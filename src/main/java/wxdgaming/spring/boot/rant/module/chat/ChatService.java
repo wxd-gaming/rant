@@ -8,12 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.format.HexId;
+import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.lang.RunResult;
 import wxdgaming.spring.boot.core.threading.LogicExecutor;
 import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.boot.core.util.HtmlDecoder;
 import wxdgaming.spring.boot.core.util.JwtUtils;
 import wxdgaming.spring.boot.core.util.StringsUtil;
+import wxdgaming.spring.boot.net.DoMessage;
 import wxdgaming.spring.boot.net.SessionHandler;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.server.SocketService;
@@ -31,7 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
  **/
 @Slf4j
 @Service
-public class ChatService implements SessionHandler {
+public class ChatService implements SessionHandler, DoMessage {
 
     final String BindKey = "__bind_key";
     final String jwtKEy = "__jwt_keysdfsgewgwegfhsodifjwsoeitgjwegsogiwegweg";
@@ -51,7 +53,13 @@ public class ChatService implements SessionHandler {
     @Start
     public void start(SocketService socketService) {
         this.socketService = socketService;
+        this.socketService.getServerMessageDecode().setDoMessage(this);
         this.socketService.getSocketServerDeviceHandler().setSessionHandler(this);
+    }
+
+    @Override public void actionString(SocketSession socketSession, String message) throws Exception {
+        JSONObject jsonObject = FastJsonUtil.parse(message);
+        onReceive(socketSession, jsonObject);
     }
 
     public void onReceive(SocketSession session, JSONObject jsonObject) {
