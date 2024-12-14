@@ -170,6 +170,11 @@
                             <source src="${msg.content}" type="video/mp4">
                             您的浏览器不支持 video 标签。
                           </video>`;
+                } else if (msg.content.endsWith(".png")
+                    || msg.content.endsWith(".jpg")
+                    || msg.content.endsWith(".jpeg")
+                    || msg.content.endsWith(".gif")) {
+                    msg.content = `<img src="${msg.content}" style="max-width: 98%;" alt="">`;
                 } else {
                     msg.content = `<object data="${msg.content}" style="max-width: 98%;"></object>`;
                 }
