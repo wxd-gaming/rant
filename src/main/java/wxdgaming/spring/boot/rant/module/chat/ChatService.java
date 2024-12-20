@@ -6,7 +6,7 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import wxdgaming.spring.boot.core.ann.Start;
+import wxdgaming.spring.boot.core.ann.AppStart;
 import wxdgaming.spring.boot.core.format.HexId;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.lang.RunResult;
@@ -50,7 +50,7 @@ public class ChatService implements SessionHandler, DoMessage {
         this.logicExecutor = logicExecutor;
     }
 
-    @Start
+    @AppStart
     public void start(SocketService socketService) {
         this.socketService = socketService;
         this.socketService.getServerMessageDecode().setDoMessage(this);
