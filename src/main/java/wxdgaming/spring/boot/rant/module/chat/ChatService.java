@@ -33,7 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
  **/
 @Slf4j
 @Service
-public class ChatService implements SessionHandler, DoMessage {
+public class ChatService extends DoMessage implements SessionHandler {
 
     final String BindKey = "__bind_key";
     final String jwtKEy = "__jwt_keysdfsgewgwegfhsodifjwsoeitgjwegsogiwegweg";
