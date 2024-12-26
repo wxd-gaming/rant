@@ -142,7 +142,7 @@ public class ChatService extends DoMessage implements SessionHandler {
                 try {
                     runResult.put("nick", chatLoginInfo.getNickName());
 
-                    JwtBuilder jwt = JwtUtils.createJwt(jwtKEy);
+                    JwtBuilder jwt = JwtUtils.createJwtBuilder(jwtKEy);
                     jwt.claim("uid", chatLoginInfo.getUid());
                     RunResult logined = RunResult.ok()
                             .fluentPut("cmd", "logined")
