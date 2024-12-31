@@ -28,7 +28,7 @@ public class Mysql2H2 {
         dataSourceConfig.setDdlAuto("create");
 
         DruidDataSource dataSource = dataSourceConfig.toDataSource();
-        EntityManager entityManager = dataSourceConfig.entityManagerFactory(dataSource, Map.of());
+        EntityManager entityManager = dataSourceConfig.entityManager(dataSource, Map.of());
 
         h2jdbcContext = new JdbcContext(dataSource, entityManager);
     }
@@ -43,7 +43,7 @@ public class Mysql2H2 {
         dataSourceConfig.setBatchInsert(true);
 
         DruidDataSource dataSource = dataSourceConfig.toDataSource();
-        EntityManager entityManager = dataSourceConfig.entityManagerFactory(dataSource, Map.of());
+        EntityManager entityManager = dataSourceConfig.entityManager(dataSource, Map.of());
 
         mysqljdbcContext = new JdbcContext(dataSource, entityManager);
     }
