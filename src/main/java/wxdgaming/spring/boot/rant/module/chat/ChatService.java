@@ -15,6 +15,7 @@ import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.boot.core.util.HtmlDecoder;
 import wxdgaming.spring.boot.core.util.JwtUtils;
 import wxdgaming.spring.boot.core.util.StringsUtil;
+import wxdgaming.spring.boot.net.MessageDispatcherHandler;
 import wxdgaming.spring.boot.net.SessionHandler;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.server.SocketService;
@@ -32,7 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
  **/
 @Slf4j
 @Service
-public class ChatService implements SessionHandler {
+public class ChatService extends MessageDispatcherHandler implements SessionHandler {
 
     final String BindKey = "__bind_key";
     final String jwtKEy = "__jwt_keysdfsgewgwegfhsodifjwsoeitgjwegsogiwegweg";
@@ -45,6 +46,7 @@ public class ChatService implements SessionHandler {
     LinkedList<RunResult> history = new LinkedList<>();
 
     public ChatService(HttpClientService httpClientService, LogicExecutor logicExecutor) {
+        super(true);
         this.httpClientService = httpClientService;
         this.logicExecutor = logicExecutor;
     }
@@ -53,12 +55,13 @@ public class ChatService implements SessionHandler {
     public void start(SocketService socketService) {
         this.socketService = socketService;
         this.socketService.getSocketServerDeviceHandler().setSessionHandler(this);
-        this.socketService.getServerMessageDecode().getDispatcher().setStringDispatcher((socketSession, message) -> {
-            JSONObject jsonObject = FastJsonUtil.parse(message);
-            onReceive(socketSession, jsonObject);
-        });
+        this.socketService.getServerMessageDecode().getDispatcher().setDispatcherHandler(this);
     }
 
+    @Override public void stringDispatcher(SocketSession socketSession, String message) {
+        JSONObject jsonObject = FastJsonUtil.parse(message);
+        onReceive(socketSession, jsonObject);
+    }
 
     public void onReceive(SocketSession session, JSONObject jsonObject) {
         String cmd = jsonObject.getString("cmd");
