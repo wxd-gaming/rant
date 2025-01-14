@@ -35,7 +35,7 @@ public class Mysql2H2 {
 
     void createMysqlDriver() {
         DruidSourceConfig dataSourceConfig = new DruidSourceConfig();
-        dataSourceConfig.setUrl("jdbc:mysql://localhost:3306/rant?serverTimezone=UTC&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&rewriteBatchedStatements=true");
+        dataSourceConfig.setUrl("jdbc:mysql://192.168.137.10:3306/rant?serverTimezone=UTC&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&rewriteBatchedStatements=true");
         dataSourceConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
         dataSourceConfig.setUsername("root");
         dataSourceConfig.setPassword("test");
