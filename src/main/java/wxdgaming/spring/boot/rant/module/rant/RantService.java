@@ -5,18 +5,18 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import wxdgaming.spring.boot.core.InitPrint;
-import wxdgaming.spring.boot.core.system.DumpUtil;
-import wxdgaming.spring.boot.core.timer.MyClock;
-import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.rant.entity.bean.GlobalData;
 import wxdgaming.spring.boot.rant.entity.bean.RantInfo;
 import wxdgaming.spring.boot.rant.entity.bean.ReplyInfo;
 import wxdgaming.spring.boot.rant.entity.store.GlobalRepository;
 import wxdgaming.spring.boot.rant.entity.store.RantRepository;
 import wxdgaming.spring.boot.rant.entity.store.ReplyRepository;
-import wxdgaming.spring.boot.webclient.HttpClientService;
-import wxdgaming.spring.boot.webclient.IPInfo;
+import wxdgaming.spring.boot.starter.core.InitPrint;
+import wxdgaming.spring.boot.starter.core.system.DumpUtil;
+import wxdgaming.spring.boot.starter.core.timer.MyClock;
+import wxdgaming.spring.boot.starter.core.util.StringsUtil;
+import wxdgaming.spring.boot.starter.net.httpclient.HttpClientBuilder;
+import wxdgaming.spring.boot.starter.net.httpclient.IPInfo;
 
 import java.io.Closeable;
 import java.util.List;
@@ -36,15 +36,15 @@ public class RantService implements InitPrint, AutoCloseable, Closeable {
     final GlobalRepository globalRepository;
     final RantRepository rantRepository;
     final ReplyRepository replyRepository;
-    private final HttpClientService httpClientService;
+    private final HttpClientBuilder httpClientService;
     private GlobalData globalData;
 
-    public RantService(GlobalRepository globalRepository, HttpClientService httpClientService,
+    public RantService(GlobalRepository globalRepository, HttpClientBuilder httpClientBuilder,
                        RantRepository rantRepository,
                        ReplyRepository replyRepository) {
         this.rantRepository = rantRepository;
         this.globalRepository = globalRepository;
-        this.httpClientService = httpClientService;
+        this.httpClientService = httpClientBuilder;
         this.replyRepository = replyRepository;
     }
 

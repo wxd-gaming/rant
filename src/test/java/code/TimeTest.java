@@ -1,7 +1,7 @@
 package code;
 
 import org.junit.Test;
-import wxdgaming.spring.boot.core.timer.MyClock;
+import wxdgaming.spring.boot.starter.core.timer.MyClock;
 
 /**
  * @author: wxd-gaming(無心道, 15388152619)

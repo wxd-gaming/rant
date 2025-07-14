@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import wxdgaming.spring.boot.data.EntityBase;
+import wxdgaming.spring.boot.starter.batis.LongUidEntity;
 
 /**
  * 回复详情
@@ -25,7 +25,8 @@ import wxdgaming.spring.boot.data.EntityBase;
         @Index(columnList = "ip"),
         @Index(columnList = "ipAddress"),
 })
-public class ReplyInfo extends EntityBase<Long> {
+public class ReplyInfo extends LongUidEntity {
+    private Long createdTime;
     /** 当前回复是那个贴贴下面的 */
     private long rantId;
     /** 可能是回复某个贴贴里面的回复 */

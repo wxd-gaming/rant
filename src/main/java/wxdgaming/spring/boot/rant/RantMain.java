@@ -7,11 +7,10 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import wxdgaming.spring.boot.core.CoreScan;
-import wxdgaming.spring.boot.data.batis.DataJdbcScan;
-import wxdgaming.spring.boot.net.NetScan;
-import wxdgaming.spring.boot.web.WebScan;
-import wxdgaming.spring.boot.webclient.WebClientScan;
+import wxdgaming.spring.boot.starter.batis.sql.DataJdbcScan;
+import wxdgaming.spring.boot.starter.core.CoreScan;
+import wxdgaming.spring.boot.starter.net.NetScan;
+import wxdgaming.spring.boot.starter.net.httpclient.HttpClientPoolScan;
 
 @Slf4j
 @EnableScheduling
@@ -20,8 +19,7 @@ import wxdgaming.spring.boot.webclient.WebClientScan;
                 CoreScan.class,
                 DataJdbcScan.class,
                 NetScan.class,
-                WebScan.class,
-                WebClientScan.class,
+                HttpClientPoolScan.class,
                 RantMain.class,
         },
         exclude = {
@@ -32,6 +30,6 @@ import wxdgaming.spring.boot.webclient.WebClientScan;
 public class RantMain {
     public static void main(String[] args) {
         ConfigurableApplicationContext run = SpringApplication.run(RantMain.class);
-        run.getBean(RantSpringReflect.class).content().executorAppStartMethod();
+        run.getBean(RantSpringReflect.class).getSpringReflectContent().executorAppStartMethod();
     }
 }

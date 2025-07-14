@@ -2,8 +2,8 @@ package wxdgaming.spring.boot.rant.entity.store;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import wxdgaming.spring.boot.data.batis.BaseRepository;
 import wxdgaming.spring.boot.rant.entity.bean.ReplyInfo;
+import wxdgaming.spring.boot.starter.batis.sql.BaseRepository;
 
 import java.util.List;
 

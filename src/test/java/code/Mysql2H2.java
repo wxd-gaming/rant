@@ -3,11 +3,11 @@ package code;
 import com.alibaba.druid.pool.DruidDataSource;
 import jakarta.persistence.EntityManager;
 import org.junit.Test;
-import wxdgaming.spring.boot.data.batis.DruidSourceConfig;
-import wxdgaming.spring.boot.data.batis.JdbcContext;
 import wxdgaming.spring.boot.rant.entity.bean.GlobalData;
 import wxdgaming.spring.boot.rant.entity.bean.RantInfo;
 import wxdgaming.spring.boot.rant.entity.bean.ReplyInfo;
+import wxdgaming.spring.boot.starter.batis.sql.DruidSourceConfig;
+import wxdgaming.spring.boot.starter.batis.sql.JdbcContext;
 
 import java.util.List;
 import java.util.Map;

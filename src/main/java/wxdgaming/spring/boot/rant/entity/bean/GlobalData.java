@@ -5,7 +5,7 @@ import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import wxdgaming.spring.boot.data.EntityBase;
+import wxdgaming.spring.boot.starter.batis.IntegerUidEntity;
 
 /**
  * 全局数据
@@ -17,8 +17,9 @@ import wxdgaming.spring.boot.data.EntityBase;
 @Setter
 @Accessors(chain = true)
 @Entity
-public class GlobalData extends EntityBase<Integer> {
+public class GlobalData extends IntegerUidEntity {
 
+    private long createdTime;
     @Column(nullable = false, columnDefinition = "bigint")
     private long rantNewId = 10000;
     @Column(nullable = false, columnDefinition = "bigint")

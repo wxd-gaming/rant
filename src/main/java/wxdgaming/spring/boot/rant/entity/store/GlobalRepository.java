@@ -1,8 +1,8 @@
 package wxdgaming.spring.boot.rant.entity.store;
 
 import org.springframework.stereotype.Repository;
-import wxdgaming.spring.boot.data.batis.BaseRepository;
 import wxdgaming.spring.boot.rant.entity.bean.GlobalData;
+import wxdgaming.spring.boot.starter.batis.sql.BaseRepository;
 
 /**
  * 门店

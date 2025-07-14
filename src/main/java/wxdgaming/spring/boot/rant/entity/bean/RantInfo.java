@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import wxdgaming.spring.boot.data.EntityBase;
+import wxdgaming.spring.boot.starter.batis.LongUidEntity;
 
 /**
  * 吐槽墙
@@ -24,8 +24,9 @@ import wxdgaming.spring.boot.data.EntityBase;
         @Index(columnList = "ip"),
         @Index(columnList = "ipAddress"),
 })
-public class RantInfo extends EntityBase<Long> {
+public class RantInfo extends LongUidEntity {
 
+    private Long createdTime;
     @Column(nullable = false, columnDefinition = "varchar(128)")
     private String ip;
     @Column(nullable = false, columnDefinition = "varchar(128)")
@@ -36,9 +37,9 @@ public class RantInfo extends EntityBase<Long> {
     @Column(columnDefinition = "varchar(1024)")
     private String content;
     @Column(columnDefinition = "int")
-    private int replyCount=0;
+    private int replyCount = 0;
     @Column(columnDefinition = "bigint")
-    private long lastReplyTime=0;
+    private long lastReplyTime = 0;
     @Column(columnDefinition = "int")
     private long likeCount;
     @Column(columnDefinition = "int")

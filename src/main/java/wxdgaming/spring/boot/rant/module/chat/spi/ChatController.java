@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import wxdgaming.spring.boot.core.io.FileUtil;
-import wxdgaming.spring.boot.core.io.FileWriteUtil;
-import wxdgaming.spring.boot.core.lang.RunResult;
-import wxdgaming.spring.boot.core.util.StringsUtil;
+import wxdgaming.spring.boot.starter.core.io.FileUtil;
+import wxdgaming.spring.boot.starter.core.io.FileWriteUtil;
+import wxdgaming.spring.boot.starter.core.lang.RunResult;
+import wxdgaming.spring.boot.starter.core.util.StringsUtil;
 
 import java.io.File;
 import java.io.IOException;

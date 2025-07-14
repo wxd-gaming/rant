@@ -1,7 +1,7 @@
 package wxdgaming.spring.boot.rant;
 
 import org.springframework.stereotype.Component;
-import wxdgaming.spring.boot.core.SpringReflect;
+import wxdgaming.spring.boot.starter.core.SpringReflect;
 
 /**
  * 主函数

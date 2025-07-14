@@ -6,21 +6,20 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import wxdgaming.spring.boot.core.ann.AppStart;
-import wxdgaming.spring.boot.core.format.HexId;
-import wxdgaming.spring.boot.core.json.FastJsonUtil;
-import wxdgaming.spring.boot.core.lang.RunResult;
-import wxdgaming.spring.boot.core.threading.LogicExecutor;
-import wxdgaming.spring.boot.core.timer.MyClock;
-import wxdgaming.spring.boot.core.util.HtmlDecoder;
-import wxdgaming.spring.boot.core.util.JwtUtils;
-import wxdgaming.spring.boot.core.util.StringsUtil;
-import wxdgaming.spring.boot.net.MessageDispatcherHandler;
-import wxdgaming.spring.boot.net.SessionHandler;
-import wxdgaming.spring.boot.net.SocketSession;
-import wxdgaming.spring.boot.net.server.SocketService;
-import wxdgaming.spring.boot.webclient.HttpClientService;
-import wxdgaming.spring.boot.webclient.IPInfo;
+import wxdgaming.spring.boot.starter.core.ann.AppStart;
+import wxdgaming.spring.boot.starter.core.format.HexId;
+import wxdgaming.spring.boot.starter.core.json.FastJsonUtil;
+import wxdgaming.spring.boot.starter.core.lang.RunResult;
+import wxdgaming.spring.boot.starter.core.threading.IExecutorServices;
+import wxdgaming.spring.boot.starter.core.timer.MyClock;
+import wxdgaming.spring.boot.starter.core.util.HtmlDecoder;
+import wxdgaming.spring.boot.starter.core.util.JwtUtils;
+import wxdgaming.spring.boot.starter.core.util.StringsUtil;
+import wxdgaming.spring.boot.starter.net.SocketSession;
+import wxdgaming.spring.boot.starter.net.httpclient.HttpClientBuilder;
+import wxdgaming.spring.boot.starter.net.httpclient.IPInfo;
+import wxdgaming.spring.boot.starter.net.pojo.IWebSocketStringListener;
+import wxdgaming.spring.boot.starter.net.server.SocketServer;
 
 import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantLock;
@@ -33,32 +32,29 @@ import java.util.concurrent.locks.ReentrantLock;
  **/
 @Slf4j
 @Service
-public class ChatService extends MessageDispatcherHandler implements SessionHandler {
+public class ChatService implements IWebSocketStringListener {
 
     final String BindKey = "__bind_key";
     final String jwtKEy = "__jwt_keysdfsgewgwegfhsodifjwsoeitgjwegsogiwegweg";
     final HexId hexId = new HexId(1);
-    final LogicExecutor logicExecutor;
-    SocketService socketService;
-    final HttpClientService httpClientService;
+    final IExecutorServices logicExecutor;
+    SocketServer socketService;
+    final HttpClientBuilder httpClientBuilder;
     private final ReentrantLock roomLock = new ReentrantLock();
     /** 历史聊天记录 */
     LinkedList<RunResult> history = new LinkedList<>();
 
-    public ChatService(HttpClientService httpClientService, LogicExecutor logicExecutor) {
-        super(true);
-        this.httpClientService = httpClientService;
+    public ChatService(HttpClientBuilder httpClientBuilder, IExecutorServices logicExecutor) {
+        this.httpClientBuilder = httpClientBuilder;
         this.logicExecutor = logicExecutor;
     }
 
     @AppStart
-    public void start(SocketService socketService) {
+    public void start(SocketServer socketService) {
         this.socketService = socketService;
-        this.socketService.getSocketServerDeviceHandler().setSessionHandler(this);
-        this.socketService.getServerMessageDecode().getDispatcher().setDispatcherHandler(this);
     }
 
-    @Override public void stringDispatcher(SocketSession socketSession, String message) {
+    @Override public void onMessage(SocketSession socketSession, String message) {
         JSONObject jsonObject = FastJsonUtil.parse(message);
         onReceive(socketSession, jsonObject);
     }
@@ -129,7 +125,7 @@ public class ChatService extends MessageDispatcherHandler implements SessionHand
                             || session.getIP().startsWith("192.168")) {
                             chatLoginInfo.setIpAddress("内网");
                         } else {
-                            IPInfo city4Ip = httpClientService.getCity4Ip(session.getIP());
+                            IPInfo city4Ip = httpClientBuilder.getCity4Ip(session.getIP());
                             chatLoginInfo.setIpAddress(city4Ip.getRegionName() + "." + city4Ip.getCity());
                         }
                     } catch (Exception ignore) {
@@ -162,7 +158,7 @@ public class ChatService extends MessageDispatcherHandler implements SessionHand
                 log.warn("未知命令{}", cmd);
                 return;
         }
-        socketService.writeAndFlush(runResult.toJSONString());
+        socketService.getSessionGroup().writeAndFlush(runResult.toJSONString());
         log.info("action:{}", jsonObject);
     }
 
