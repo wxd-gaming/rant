@@ -1,4 +1,5 @@
-debug: false
+debug: true
+sid: 1
 server:
   port: 8081   #端口号
   tomcat:

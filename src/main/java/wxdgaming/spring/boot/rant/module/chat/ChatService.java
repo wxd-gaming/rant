@@ -10,6 +10,7 @@ import wxdgaming.spring.boot.starter.core.ann.AppStart;
 import wxdgaming.spring.boot.starter.core.format.HexId;
 import wxdgaming.spring.boot.starter.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.starter.core.lang.RunResult;
+import wxdgaming.spring.boot.starter.core.threading.ExecutorUtil;
 import wxdgaming.spring.boot.starter.core.threading.IExecutorServices;
 import wxdgaming.spring.boot.starter.core.timer.MyClock;
 import wxdgaming.spring.boot.starter.core.util.HtmlDecoder;
@@ -44,9 +45,9 @@ public class ChatService implements IWebSocketStringListener {
     /** 历史聊天记录 */
     LinkedList<RunResult> history = new LinkedList<>();
 
-    public ChatService(HttpClientBuilder httpClientBuilder, IExecutorServices logicExecutor) {
+    public ChatService(HttpClientBuilder httpClientBuilder, ExecutorUtil executorUtil) {
         this.httpClientBuilder = httpClientBuilder;
-        this.logicExecutor = logicExecutor;
+        this.logicExecutor = executorUtil.getLogicExecutor();
     }
 
     @AppStart

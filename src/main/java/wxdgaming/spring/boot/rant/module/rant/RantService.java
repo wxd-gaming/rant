@@ -36,10 +36,11 @@ public class RantService implements InitPrint, AutoCloseable, Closeable {
     final GlobalRepository globalRepository;
     final RantRepository rantRepository;
     final ReplyRepository replyRepository;
-    private final HttpClientBuilder httpClientService;
-    private GlobalData globalData;
+    final HttpClientBuilder httpClientService;
+    GlobalData globalData;
 
-    public RantService(GlobalRepository globalRepository, HttpClientBuilder httpClientBuilder,
+    public RantService(HttpClientBuilder httpClientBuilder,
+                       GlobalRepository globalRepository,
                        RantRepository rantRepository,
                        ReplyRepository replyRepository) {
         this.rantRepository = rantRepository;
