@@ -21,6 +21,7 @@ import wxdgaming.spring.boot.starter.net.httpclient.HttpClientBuilder;
 import wxdgaming.spring.boot.starter.net.httpclient.IPInfo;
 import wxdgaming.spring.boot.starter.net.pojo.IWebSocketStringListener;
 import wxdgaming.spring.boot.starter.net.server.SocketServer;
+import wxdgaming.spring.boot.starter.net.server.SocketServerImpl;
 
 import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantLock;
@@ -39,7 +40,7 @@ public class ChatService implements IWebSocketStringListener {
     final String jwtKEy = "__jwt_keysdfsgewgwegfhsodifjwsoeitgjwegsogiwegweg";
     final HexId hexId = new HexId(1);
     final IExecutorServices logicExecutor;
-    SocketServer socketService;
+    SocketServerImpl socketService;
     final HttpClientBuilder httpClientBuilder;
     private final ReentrantLock roomLock = new ReentrantLock();
     /** 历史聊天记录 */
@@ -51,7 +52,7 @@ public class ChatService implements IWebSocketStringListener {
     }
 
     @AppStart
-    public void start(SocketServer socketService) {
+    public void start(SocketServerImpl socketService) {
         this.socketService = socketService;
     }
 

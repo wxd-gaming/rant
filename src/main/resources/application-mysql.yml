@@ -8,10 +8,12 @@ spring:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
 
   jdbc:
-    url: jdbc:mysql://192.168.137.10:3306/rant?serverTimezone=UTC&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&rewriteBatchedStatements=true
-    username: root
-    password: test
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    show-sql: false
-    ddl-auto: "update"
+    config:
+      url: jdbc:mysql://192.168.137.10:3306/rant?serverTimezone=UTC&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&rewriteBatchedStatements=true
+      username: root
+      password: test
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      show-sql: false
+      ddl-auto: "update"
+      packageNames: wxdgaming.spring.boot.rant.entity.bean
 

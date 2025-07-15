@@ -8,9 +8,7 @@ import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.rant.entity.bean.GlobalData;
 import wxdgaming.spring.boot.rant.entity.bean.RantInfo;
 import wxdgaming.spring.boot.rant.entity.bean.ReplyInfo;
-import wxdgaming.spring.boot.rant.entity.store.GlobalRepository;
-import wxdgaming.spring.boot.rant.entity.store.RantRepository;
-import wxdgaming.spring.boot.rant.entity.store.ReplyRepository;
+import wxdgaming.spring.boot.starter.batis.sql.JdbcContext;
 import wxdgaming.spring.boot.starter.core.InitPrint;
 import wxdgaming.spring.boot.starter.core.system.DumpUtil;
 import wxdgaming.spring.boot.starter.core.timer.MyClock;
@@ -33,25 +31,18 @@ import java.util.Optional;
 @Service
 public class RantService implements InitPrint, AutoCloseable, Closeable {
 
-    final GlobalRepository globalRepository;
-    final RantRepository rantRepository;
-    final ReplyRepository replyRepository;
+    final JdbcContext jdbcContext;
     final HttpClientBuilder httpClientService;
     GlobalData globalData;
 
-    public RantService(HttpClientBuilder httpClientBuilder,
-                       GlobalRepository globalRepository,
-                       RantRepository rantRepository,
-                       ReplyRepository replyRepository) {
-        this.rantRepository = rantRepository;
-        this.globalRepository = globalRepository;
+    public RantService(HttpClientBuilder httpClientBuilder, JdbcContext jdbcContext) {
         this.httpClientService = httpClientBuilder;
-        this.replyRepository = replyRepository;
+        this.jdbcContext = jdbcContext;
     }
 
     @PostConstruct
     public void initialize() {
-        Optional<GlobalData> byId = globalRepository.findById(1);
+        Optional<GlobalData> byId = Optional.ofNullable(jdbcContext.find(GlobalData.class, 1));
         byId.ifPresentOrElse(
                 find -> {
                     globalData = find;
@@ -65,7 +56,7 @@ public class RantService implements InitPrint, AutoCloseable, Closeable {
     }
 
     public void saveAndFlush() {
-        globalRepository.saveAndFlush(globalData);
+        jdbcContext.save(globalData);
     }
 
     @Override public void close() {
@@ -81,7 +72,7 @@ public class RantService implements InitPrint, AutoCloseable, Closeable {
 
     @Scheduled(cron = "0 */2 * * * ?")
     public void actionIp() {
-        List<RantInfo> allNullIp = rantRepository.findAllNullIp();
+        List<RantInfo> allNullIp = jdbcContext.findAll("select t from RantInfo t where t.ipAddress is null or t.ipAddress=''", RantInfo.class);
         for (RantInfo rantInfo : allNullIp) {
             if (StringsUtil.emptyOrNull(rantInfo.getIpAddress())) {
                 try {
@@ -97,10 +88,11 @@ public class RantService implements InitPrint, AutoCloseable, Closeable {
                     rantInfo.setIpAddress("外星球");
                     log.warn("ip查询失败{}", ignore.toString());
                 }
-                rantRepository.saveAndFlush(rantInfo);
+                jdbcContext.save(rantInfo);
             }
         }
-        List<ReplyInfo> allNullIp1 = replyRepository.findAllNullIp();
+
+        List<ReplyInfo> allNullIp1 = jdbcContext.findAll("select t from ReplyInfo t where t.ipAddress is null or t.ipAddress=''", ReplyInfo.class);
         for (ReplyInfo replyInfo : allNullIp1) {
             if (StringsUtil.emptyOrNull(replyInfo.getIpAddress())) {
                 try {
@@ -116,7 +108,7 @@ public class RantService implements InitPrint, AutoCloseable, Closeable {
                     replyInfo.setIpAddress("外星球");
                     log.warn("ip查询失败{}", ignore.toString());
                 }
-                replyRepository.saveAndFlush(replyInfo);
+                jdbcContext.save(replyInfo);
             }
         }
     }

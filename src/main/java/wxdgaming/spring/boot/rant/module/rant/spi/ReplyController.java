@@ -7,9 +7,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import wxdgaming.spring.boot.rant.entity.bean.RantInfo;
 import wxdgaming.spring.boot.rant.entity.bean.ReplyInfo;
-import wxdgaming.spring.boot.rant.entity.store.RantRepository;
-import wxdgaming.spring.boot.rant.entity.store.ReplyRepository;
 import wxdgaming.spring.boot.rant.module.rant.RantService;
+import wxdgaming.spring.boot.starter.batis.sql.JdbcContext;
 import wxdgaming.spring.boot.starter.core.SpringUtil;
 import wxdgaming.spring.boot.starter.core.lang.RunResult;
 import wxdgaming.spring.boot.starter.core.timer.MyClock;
@@ -31,22 +30,21 @@ import java.util.stream.Collectors;
 @RequestMapping("/reply")
 public class ReplyController {
 
-    final RantRepository rantRepository;
-    final ReplyRepository replyRepository;
+    final JdbcContext jdbcContext;
     final RantService robotService;
     final RantController rantController;
 
-    public ReplyController(RantRepository rantRepository, RantService robotService, ReplyRepository replyRepository, RantController rantController) {
-        this.rantRepository = rantRepository;
+    public ReplyController(JdbcContext jdbcContext, RantService robotService, RantController rantController) {
+        this.jdbcContext = jdbcContext;
         this.robotService = robotService;
-        this.replyRepository = replyRepository;
         this.rantController = rantController;
     }
 
     @RequestMapping("/get")
     public RunResult get(@RequestParam(name = "rantId") long rantId) {
-        List<ReplyInfo> allByRantId = replyRepository.findAllByRantId(rantId);
-        Optional<RantInfo> byId = rantRepository.findById(rantId);
+
+        List<ReplyInfo> allByRantId = jdbcContext.findAll("select t from ReplyInfo t where t.rantId = ?1", ReplyInfo.class, rantId);
+        Optional<RantInfo> byId = Optional.ofNullable(jdbcContext.find(RantInfo.class, rantId));
         if (byId.isEmpty()) {
             return RunResult.error("找不到记录");
         }
@@ -85,12 +83,12 @@ public class ReplyController {
                 return RunResult.error("内容应该小于1000字");
             }
 
-            Optional<RantInfo> byId = rantRepository.findById(rantId);
+            Optional<RantInfo> byId = jdbcContext.findNullable(RantInfo.class, rantId);
             if (byId.isEmpty()) {
                 return RunResult.error("找不到记录");
             }
             if (replyId > 0) {
-                if (replyRepository.findById(replyId).isEmpty()) {
+                if (jdbcContext.findNullable(ReplyInfo.class, replyId).isEmpty()) {
                     return RunResult.error("找不到回复记录");
                 }
             }
@@ -107,8 +105,8 @@ public class ReplyController {
                     .setContent(content.trim());
             replyInfo.setUid(robotService.getGlobalData().replyNewId());
             replyInfo.setCreatedTime(MyClock.millis());
-            replyRepository.save(replyInfo);
-            rantRepository.saveAndFlush(byId.get());
+            jdbcContext.save(replyInfo);
+            jdbcContext.save(byId.get());
             robotService.saveAndFlush();
             return RunResult.ok().data(byId.get().getReplyCount());
         }
@@ -116,26 +114,26 @@ public class ReplyController {
 
     @RequestMapping("/like")
     public RunResult like(@RequestParam(name = "uid") Long uid) {
-        ReplyInfo rantInfo = replyRepository.findById(uid).orElse(null);
+        ReplyInfo rantInfo = jdbcContext.findNullable(ReplyInfo.class, uid).orElse(null);
         if (rantInfo == null) {
             return RunResult.error("找不到记录");
         }
         synchronized (rantInfo.getUid().toString().intern()) {
             rantInfo.setLikeCount(Math.addExact(rantInfo.getLikeCount(), 1));
-            replyRepository.save(rantInfo);
+            jdbcContext.save(rantInfo);
         }
         return RunResult.ok().data(rantInfo.getLikeCount());
     }
 
     @RequestMapping("/dislike")
     public RunResult dislike(@RequestParam(name = "uid") Long uid) {
-        ReplyInfo rantInfo = replyRepository.findById(uid).orElse(null);
+        ReplyInfo rantInfo = jdbcContext.findNullable(ReplyInfo.class, uid).orElse(null);
         if (rantInfo == null) {
             return RunResult.error("找不到记录");
         }
         synchronized (rantInfo.getUid().toString().intern()) {
             rantInfo.setDislikeCount(Math.addExact(rantInfo.getDislikeCount(), 1));
-            replyRepository.save(rantInfo);
+            jdbcContext.save(rantInfo);
         }
         return RunResult.ok().data(rantInfo.getDislikeCount());
     }

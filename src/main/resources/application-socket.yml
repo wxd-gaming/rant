@@ -1,13 +1,20 @@
 socket:
-  debugLogger: false
-  printLogger: true
-  bossThreadSize: 2 #线程池的线程数量，共享
-  workerThreadSize: 10 #线程池的线程数量，共享
-  server1:
-    config:
-      port: 18001
-      idleTimeout: 30 # 单位秒
-      enable-web-socket: true
-      web-socket-prefix: "/wxd-chat"
-      sslProtocolType: TLSV12 # TLSV12  TLSV1 SSLV3 SSL
-      max-frame-length: 15 #每秒钟最大消息数量
+  server:
+    debug: false
+    port: 18001
+    enabledTcp: false                                         #是否启用tcp
+    enabledScheduledFlush: true                             # 开启定时器flush
+    scheduledFlushMs: 10                                    #定时调用flush的频率单位是ms
+    enabledWebSocket: true                                  #是否启用websocket
+    webSocketPrefix: "/wxd-chat"                                   #websocket前缀
+    maxAggregatorLength: 64                                  #聚合器最大长度 单位MB
+    maxFrameBytes: -1                                        #单个消息最大长度
+    maxFrameLength: -1                                       #一秒钟接收消息最大数量
+    sslProtocolType: TLS                                     #ssll类型
+    sslKeyStorePath: "jks/wxdtest-1.8.jks"                   #jks证书路径
+    sslPasswordPath: "jks/wxdtest-1.8.jks.pwd"               #jks证书密码路径
+    idleTimeout: 0
+    writeTimeout: 0
+    readTimeout: 0
+    recvByteBufM: 12                                          #接收缓冲区大小 单位MB
+    writeByteBufM: 12                                         #发送缓冲区大小 单位MB

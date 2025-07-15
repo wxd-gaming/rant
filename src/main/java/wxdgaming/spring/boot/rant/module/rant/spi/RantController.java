@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import wxdgaming.spring.boot.rant.entity.bean.RantInfo;
-import wxdgaming.spring.boot.rant.entity.store.RantRepository;
 import wxdgaming.spring.boot.rant.module.rant.RantService;
+import wxdgaming.spring.boot.starter.batis.sql.JdbcContext;
 import wxdgaming.spring.boot.starter.core.SpringUtil;
 import wxdgaming.spring.boot.starter.core.lang.RunResult;
 import wxdgaming.spring.boot.starter.core.timer.MyClock;
@@ -28,34 +28,32 @@ import java.util.List;
 @RequestMapping("/rant")
 public class RantController {
 
-    final RantRepository rantRepository;
+    final JdbcContext jdbcContext;
     final RantService robotService;
 
-    public RantController(RantRepository rantRepository, RantService robotService) {
-        this.rantRepository = rantRepository;
+    public RantController(JdbcContext jdbcContext, RantService robotService) {
+        this.jdbcContext = jdbcContext;
         this.robotService = robotService;
     }
 
     @RequestMapping("/list")
     public RunResult list(@RequestParam(name = "sort", required = false, defaultValue = "随机") String sort) {
         sort = HtmlDecoder.escapeHtml3(sort);
-        List<RantInfo> all = rantRepository.findAll();
-        if ("发布倒序".equals(sort)) {
-            all.sort((o1, o2) -> {
+        List<RantInfo> all = jdbcContext.findAll(RantInfo.class);
+        switch (sort) {
+            case "发布倒序" -> all.sort((o1, o2) -> {
                 if (!o2.getCreatedTime().equals(o1.getCreatedTime())) {
                     return Long.compare(o2.getCreatedTime(), o1.getCreatedTime());
                 }
                 return Long.compare(o2.getUid(), o1.getUid());
             });
-        } else if ("发布正序".equals(sort)) {
-            all.sort((o1, o2) -> {
+            case "发布正序" -> all.sort((o1, o2) -> {
                 if (!o1.getCreatedTime().equals(o2.getCreatedTime())) {
                     return Long.compare(o1.getCreatedTime(), o2.getCreatedTime());
                 }
                 return Long.compare(o1.getUid(), o2.getUid());
             });
-        } else if ("最多点赞".equals(sort)) {
-            all.sort((o1, o2) -> {
+            case "最多点赞" -> all.sort((o1, o2) -> {
                 if (o2.getLikeCount() != o1.getLikeCount()) {
                     return Long.compare(o2.getLikeCount(), o1.getLikeCount());
                 }
@@ -64,8 +62,7 @@ public class RantController {
                 }
                 return Long.compare(o2.getUid(), o1.getUid());
             });
-        } else if ("最多点踩".equals(sort)) {
-            all.sort((o1, o2) -> {
+            case "最多点踩" -> all.sort((o1, o2) -> {
                 if (o2.getDislikeCount() != o1.getDislikeCount()) {
                     return Long.compare(o2.getDislikeCount(), o1.getDislikeCount());
                 }
@@ -74,8 +71,7 @@ public class RantController {
                 }
                 return Long.compare(o2.getUid(), o1.getUid());
             });
-        } else if ("最多评论".equals(sort)) {
-            all.sort((o1, o2) -> {
+            case "最多评论" -> all.sort((o1, o2) -> {
                 if (o2.getReplyCount() != o1.getReplyCount()) {
                     return Long.compare(o2.getReplyCount(), o1.getReplyCount());
                 }
@@ -84,8 +80,7 @@ public class RantController {
                 }
                 return Long.compare(o2.getUid(), o1.getUid());
             });
-        } else if ("最新评论".equals(sort)) {
-            all.sort((o1, o2) -> {
+            case "最新评论" -> all.sort((o1, o2) -> {
                 if (o2.getLastReplyTime() != o1.getLastReplyTime()) {
                     return Long.compare(o2.getLastReplyTime(), o1.getLastReplyTime());
                 }
@@ -94,8 +89,7 @@ public class RantController {
                 }
                 return Long.compare(o2.getUid(), o1.getUid());
             });
-        } else {
-            Collections.shuffle(all);
+            default -> Collections.shuffle(all);
         }
         List<JSONObject> list = all.stream().map(this::convert).limit(300).toList();
         return RunResult.ok().data(list).fluentPut("dataSize", all.size());
@@ -140,33 +134,33 @@ public class RantController {
                 .setContent(content.trim());
         rantInfo.setUid(robotService.getGlobalData().rantNewId());
         rantInfo.setCreatedTime(MyClock.millis());
-        rantRepository.save(rantInfo);
+        jdbcContext.save(rantInfo);
         robotService.saveAndFlush();
         return RunResult.ok().data(convert(rantInfo));
     }
 
     @RequestMapping("/like")
     public RunResult like(@RequestParam(name = "uid") Long uid) {
-        RantInfo rantInfo = rantRepository.findById(uid).orElse(null);
+        RantInfo rantInfo = jdbcContext.findNullable(RantInfo.class, uid).orElse(null);
         if (rantInfo == null) {
             return RunResult.error("找不到记录");
         }
         synchronized (rantInfo.getUid().toString().intern()) {
             rantInfo.setLikeCount(Math.addExact(rantInfo.getLikeCount(), 1));
-            rantRepository.save(rantInfo);
+            jdbcContext.save(rantInfo);
         }
         return RunResult.ok().data(rantInfo.getLikeCount());
     }
 
     @RequestMapping("/dislike")
     public RunResult dislike(@RequestParam(name = "uid") Long uid) {
-        RantInfo rantInfo = rantRepository.findById(uid).orElse(null);
+        RantInfo rantInfo = jdbcContext.findNullable(RantInfo.class, uid).orElse(null);
         if (rantInfo == null) {
             return RunResult.error("找不到记录");
         }
         synchronized (rantInfo.getUid().toString().intern()) {
             rantInfo.setDislikeCount(Math.addExact(rantInfo.getDislikeCount(), 1));
-            rantRepository.save(rantInfo);
+            jdbcContext.save(rantInfo);
         }
         return RunResult.ok().data(rantInfo.getDislikeCount());
     }
